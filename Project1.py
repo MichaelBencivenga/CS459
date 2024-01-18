@@ -1,15 +1,25 @@
+import pyttsx3
+try:
+    engine = pyttsx3.init
+except:
+    print("oops")
+    
 #false = selfie true = subject
+#Could we have the spacebar interupt the program at any time and allow for command input? Or just something to allow user input at any time?
 cameramode = False
 def main():
-    print("hello")
-    #check libraries are working
-    #not this exactly but something similar, grab name of non-working library
-    if library == 0:
-        error = library + "is being a little silly"
-        print(error)
-    else:
+    try:        
+        engine.onError(voice_output, "VoiceError")
+        volume = engine.getProperty('volume')
+        engine.setProperty('volume', 0.5)
+        voice_out("Hello welcome to the program, would you like to change the volume?")
+        if voice_in:
+            
+        engine.runAndWait()
         voice_out("Would you like to take a selfie or photograph an object?")
-        vo_in = user_in()
+        vo_in = voice_in()
+    except VoiceError:
+        print("Error in text to speech")
 def commands(vo_in):
     if "help" in vo_in:
         #Find last word, hopefully the command
@@ -19,6 +29,8 @@ def commands(vo_in):
         match vo_in:
             case _: 
                 print("Nuh uh")
+    elif vo_in.isnumeric():
+        return vo_in / 100
     else:
         match vo_in:
             case "commands":
@@ -33,20 +45,67 @@ def commands(vo_in):
             case "object":
                 cameramode = 1
                 take_photo()
+            case "position?":#I cant think of the correct word but like the framing of the object? Like centered and all that
+                voice_out("#Variable storing current object position") 
+            case "yes":
+                return True
+            case "no":
+                return False
+            case "center":
+                return "c"
+            case "bottom left":
+                return "bl"
+            case "bottom right":
+                return "br"
+            case "top left":
+                return "tl"
+            case "top right":
+                return "tr"
             case _:
                 print("Nuh uh")
-def user_in():
+def voice_in():
     #Start voice input
     vo_in =  "" #convert voice to string
     return vo_in
 def voice_out(vo_out):
-    #use silly api to text to speech 
-    print("something so this doesnt have an error")
+    engine.say(vo_out)
 def take_photo():
     voice_out("Ready for photo?")
     #Take a little silly photo
     if cameramode == 0:
         position = 1 #get position
         voice_out("Your face is" + position + ". Would you like to change the position?")
-        vo_in = user_in() 
-        
+        if commands(voice_in_in()) == True:
+            voice_out("What would you like the position to be")
+            reposition(voice_in())
+        else:
+            voice_out("Done")
+def reposition(posw):
+    #Position wanted
+    #Numbers are in no way shape or form final but this was my idea of how to interpret it
+    #could probably go more in depth like allowing center top right. Nothing coming to mind rn though
+    posc = (0,0) #change to grab from api
+    match position:
+        case "center":
+            posw = (0,0)
+        case "bl":
+            posw = (-5,-5)
+        case "br":
+            posw = (5,-5)
+        case "tl":
+            posw = (-5,5)
+        case "tr":
+            posw = (5,5)
+        case _:
+            print("Nuh uh")
+    while posc != posw:
+        if posw[0] != posc[0]:
+            if posw[0] < posc[0]:
+                voice_out("down")
+            else:
+                voice_out("up")
+        if posw[1] != posc[1]:
+            if posw[1] < posc[1]:
+                voice_out("left")
+            else:
+                voice_out("right")
