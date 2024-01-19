@@ -9,17 +9,23 @@ except:
 cameramode = False
 def main():
     try:        
-        engine.onError(voice_output, "VoiceError")
-        volume = engine.getProperty('volume')
+        #engine.onError(voice_output, "VoiceError")
         engine.setProperty('volume', 0.5)
         voice_out("Hello welcome to the program, would you like to change the volume?")
+        cvol = False #change volume
         if voice_in:
-            
-        engine.runAndWait()
+            cvol = True
+        while cvol == True:
+            voice_out("what would you like the volume set to out of 100?")
+            volume = voice_in
+            engine.setProperty('volume', volume)
+            voice_out("Is this volume good?")
+            if voice_in:
+                cvol = False
         voice_out("Would you like to take a selfie or photograph an object?")
-        vo_in = voice_in()
-    except VoiceError:
-        print("Error in text to speech")
+        voice_in()
+    except Exception:
+        print(Exception)
 def commands(vo_in):
     if "help" in vo_in:
         #Find last word, hopefully the command
@@ -69,6 +75,7 @@ def voice_in():
     return vo_in
 def voice_out(vo_out):
     engine.say(vo_out)
+    engine.runAndWait()
 def take_photo():
     voice_out("Ready for photo?")
     #Take a little silly photo
