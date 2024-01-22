@@ -1,8 +1,28 @@
-import pyttsx3
+#import and set up for speech and text
+import pyttsx3 
 try:
     engine = pyttsx3.init
 except:
     print("oops")
+
+#imports for taking images and face + object detection
+import cv2 as cv
+import mediapipe as mp
+import torch
+import ultralytics
+
+#setting up object detection using the ultralytics library and yolov8 model and training set
+from ultralytics import YOLO
+from PIL import Image
+ultralytics.checks()
+model = YOLO("yolov8n.pt") #loads the pretrained yolov8 model to save time when application is in use
+
+#setting up mediapipe package for face detection
+mp_face_detection= mp.solutions.face_detection.FaceDetection()
+mp_drawing = mp.solutions.drawing_utils
+
+#setting up opencv to use webcam
+webcam = cv.VideoCapture(0)
     
 #false = selfie true = subject
 #Could we have the spacebar interupt the program at any time and allow for command input? Or just something to allow user input at any time?
@@ -78,7 +98,10 @@ def voice_out(vo_out):
     engine.runAndWait()
 def take_photo():
     voice_out("Ready for photo?")
+    
     #Take a little silly photo
+    result, image = webcam.read()
+
     if cameramode == 0:
         position = 1 #get position
         voice_out("Your face is" + position + ". Would you like to change the position?")
@@ -87,6 +110,9 @@ def take_photo():
             reposition(voice_in())
         else:
             voice_out("Done")
+            cv.imwrite("Final.jpg", image) #saves the image under the name Final in a jpeg format
+            cv.imshow("Final",image) #displays the final image, is this needed as user may be completely blind??
+
 def reposition(posw):
     #Position wanted
     #Numbers are in no way shape or form final but this was my idea of how to interpret it
