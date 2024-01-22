@@ -105,7 +105,7 @@ def take_photo():
     if cameramode == 0:
         position = 1 #get position
         voice_out("Your face is" + position + ". Would you like to change the position?")
-        if commands(voice_in_in()) == True:
+        if commands(voice_in()) == True:
             voice_out("What would you like the position to be")
             reposition(voice_in())
         else:
@@ -117,18 +117,20 @@ def reposition(posw):
     #Position wanted
     #Numbers are in no way shape or form final but this was my idea of how to interpret it
     #could probably go more in depth like allowing center top right. Nothing coming to mind rn though
-    posc = (0,0) #change to grab from api
+    screenr = (640,640) #grab from api
+    posc = (0,0) #change to grab from api, position current
+    position = voice_in()
     match position:
         case "center":
-            posw = (0,0)
+            posw = (screenr[0]/2,screenr[1]/2)
         case "bl":
-            posw = (-5,-5)
+            posw = (screenr[0]*0.25,screenr[1]*0.25)
         case "br":
-            posw = (5,-5)
+            posw = (screenr[0]*0.75,screenr[1]/0.25)
         case "tl":
-            posw = (-5,5)
+            posw = (screenr[0]*0.25,screenr[1]*0.75)
         case "tr":
-            posw = (5,5)
+            posw = (screenr[0]*0.75,screenr[1]*0.75)
         case _:
             print("Nuh uh")
     while posc != posw:
