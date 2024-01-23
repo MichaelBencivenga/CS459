@@ -109,37 +109,36 @@ def voice_out(vo_out):
     engine.runAndWait()
 
 def take_photo():
-    voice_out("Ready for photo?")
-    
-    #Take a little silly photo
-    success, image = webcam.read()
 
     if cameramode == 0:
         #Selfie option
-        image2 = cv.cvtColor(image,cv.COLOR_BGR2RGB) #changes color scale to allow mediapipe image processing
-        results = mp_face_detection.process(image) #uses face detection model to find faces in image
-        image2 = cv.cvtColor(image,cv.COLOR_RGB2BGR) #return image to original color scale
-
-        #draw face detection annotations 
-        if results.detections:
-            for detection in results.detections:
-                mp_drawing.draw_detection(image2,detection) #all changes+annotations made to seperate image so clean version can be saved
-
-        #gets location of face
-        bbox = detection.location_date.relative_bounding_box
-        bbox_list = [bbox.xmin, bbox.ymin, bbox.width, bbox.height] #xmin and ymin are the coordiantes of the bottom left of the box
-
+        
         voice_out("Are you ready for the selfie?")
         if voice_in() == False:
             voice_out("Say yes when ready")
             voice_in()
             #Take a little silly photo
             #selfie
+            image = webcam.read()
+
+            image2 = cv.cvtColor(image,cv.COLOR_BGR2RGB) #changes color scale to allow mediapipe image processing
+            results = mp_face_detection.process(image) #uses face detection model to find faces in image
+            image2 = cv.cvtColor(image,cv.COLOR_RGB2BGR) #return image to original color scale
+
+            #draw face detection annotations 
+            if results.detections:
+                for detection in results.detections:
+                    mp_drawing.draw_detection(image2,detection) #all changes+annotations made to seperate image so clean version can be saved
+
+            #gets location of face
+            bbox = detection.location_date.relative_bounding_box
+            bbox_list = [bbox.xmin, bbox.ymin, bbox.width, bbox.height] #xmin and ymin are the coordiantes of the bottom left of the box
+
             position = 1 #get position from api
             voice_out("Your face is" + position + ". Would you like to change the position?")
             if voice_in():
-                voice_out("What would you like the position to be")
-                reposition(voice_in())
+                    voice_out("What would you like the position to be")
+                    reposition(voice_in())
             else:
                 voice_out("Done")
                 voice_in()
@@ -151,6 +150,12 @@ def take_photo():
         names = []
         objs = []
         coords = []
+
+        voice_out("Are you ready for the selfie?")
+        if voice_in() == False:
+            voice_out("Say yes when ready")
+            voice_in()
+            image = webcam.read()
 
         results = model(image) #runs the object detection model on image taken
         names = model.names
