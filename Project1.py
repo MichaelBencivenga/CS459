@@ -143,6 +143,8 @@ def take_photo():
             else:
                 voice_out("Done")
                 voice_in()
+                cv.imwrite("Final.jpg", image) #saves the image under the name Final in a jpeg format
+                cv.imshow("Final",image) #displays the final image, is this needed as user may be completely blind??
     else:
         #Object option
         #initializing lists for positioning
