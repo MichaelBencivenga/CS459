@@ -27,6 +27,7 @@ webcam = cv.VideoCapture(0)
 #false = selfie true = subject
 #Could we have the spacebar interupt the program at any time and allow for command input? Or just something to allow user input at any time?
 cameramode = False
+
 def main():
     try:        
         #engine.onError(voice_output, "VoiceError")
@@ -47,6 +48,7 @@ def main():
         voice_in()
     except Exception:
         print(Exception)
+
 def commands(vo_in):
     if "help" in vo_in:
         #Find last word, hopefully the command
@@ -93,6 +95,7 @@ def commands(vo_in):
                 return "tr"
             case _:
                 print("Nuh uh")
+
 def voice_in(object):
     #Start voice input
     #code should not procceed until it gets an input
@@ -100,9 +103,11 @@ def voice_in(object):
     if object:
         return vo_in
     return commands(vo_in)
+
 def voice_out(vo_out):
     engine.say(vo_out)
     engine.runAndWait()
+
 def take_photo():
     voice_out("Ready for photo?")
     
@@ -139,6 +144,24 @@ def take_photo():
                 voice_out("Done")
                 voice_in()
     else:
+        #Object option
+        #initializing lists for positioning
+        names = []
+        objs = []
+        coords = []
+
+        results = model(image) #runs the object detection model on image taken
+        names = model.names
+
+        #stores objects detected and their placements in lists
+        for r in results:
+            boxes = r.boxes #put bounding box detections into a list
+            coords.append(boxes.xyxy) #list of the xy coordiantes, first coord is bottom left and second is top right
+
+            for c in r.boxes.cls:
+                objs.append(names[int(c)]) #adds name of each object detected to list in same order as coordinates
+
+
         voice_out("What object would you like to photograph?")
         object = voice_in(1)
         position = 1 #get position from api
