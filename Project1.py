@@ -210,3 +210,32 @@ def reposition(posw):
                 voice_out("left")
             else:
                 voice_out("right")
+
+def convertPos(coord):
+    #take the coord and make it an accepted postion
+    screenr = (640,480) #size of images caputred by default with opencv
+    curPos = findCenterObj(coord)
+    
+    if(((curPos[0] <screenr[0]*0.25) and (curPos[1] < screenr[1]*0.25))):
+        pos = "bl" #center of object is in bottom left, as x and y positons are less than edges
+    elif(((curPos[0] < screenr[0]*0.25 ) and (curPos[1] > screenr[1]*0.75 ))):
+        pos = "tl" #center of object is in top left as x value is less than horizontal bound and y is greater than vertical bound
+    elif (((curPos[0] > screenr[0]*0.75) and (curPos[1] < screenr[1]/0.25))):
+        pos = "br" #in bottom right
+    elif(((curPos[0] > screenr[0]*0.75) and (curPos[1] > screenr[1]*0.75))):
+        pos = "tr" #in top right
+    else:
+        pos = "center" #temporary default
+
+    #currently no case for the center being on a line or object is in multiple sections
+
+    return pos
+
+def findCenterObj(pos):
+    #calculate the midpoint of the object
+    midpoint = () #tuple for the x and y coords of the center of the object
+    x = (pos[0] + pos[3]) /2  #midpoint of the xvalues
+    y = (pos[1] + pos[4]) /2  #midpoint of the yvalues
+    midpoint.append(x)
+    midpoint.append(y)
+    return midpoint
