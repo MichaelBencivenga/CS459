@@ -163,18 +163,21 @@ def take_photo():
             for c in r.boxes.cls:
                 objs.append(names[int(c)]) #adds name of each object detected to list in same order as coordinates
 
-
-        voice_out("What object would you like to photograph?")
-        object = voice_in(1)
-        position = 1 #get position from api
-        voice_out("The" + object + "is" + position + ". Would you like to change the position?")
-        if voice_in():
-            voice_out("What would you like the position to be")
-            reposition(voice_in())
-        else:
-            voice_out("Done")
-            cv.imwrite("Final.jpg", image) #saves the image under the name Final in a jpeg format
-            cv.imshow("Final",image) #displays the final image, is this needed as user may be completely blind??
+        for o in objs:
+            #go through each object detected and tell the user what it is and where it is located
+            obj = objs[o]
+            curcoord = coords[o] #gives the coords of the current object
+            position = convertPos(curcoord) #new function to change coords to a section of the screen
+            voice_out("The" + obj + "is" + position + ". Would you like to change the position?")
+            
+            if voice_in():
+                #user wants to change the position of the current object
+                voice_out("What would you like the position to be")
+                reposition(voice_in())
+            else:
+                voice_out("Done")
+                cv.imwrite("Final.jpg", image) #saves the image under the name Final in a jpeg format
+                cv.imshow("Final",image) #displays the final image, is this needed as user may be completely blind??
 
 def reposition(posw):
     #Position wanted
