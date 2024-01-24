@@ -1,10 +1,5 @@
-#import and set up for speech and text
+#import for speech and text
 import pyttsx3 
-try:
-    engine = pyttsx3.init
-except:
-    print("oops")
-
 #imports for taking images and face + object detection
 import cv2 as cv
 import mediapipe as mp
@@ -29,8 +24,10 @@ webcam = cv.VideoCapture(0)
 cameramode = False
 
 def main():
-    try:        
+    try:
         #engine.onError(voice_output, "VoiceError")
+        global engine 
+        engine = pyttsx3.init()
         engine.setProperty('volume', 0.5)
         voice_out("Hello welcome to the program, would you like to change the volume?")
         cvol = False #change volume
@@ -39,15 +36,17 @@ def main():
             cvol = True
         while cvol == True:
             voice_out("what would you like the volume set to out of 100?")
-            volume = voice_in
+            volume = voice_in()
             engine.setProperty('volume', volume)
             voice_out("Is this volume good?")
             if voice_in():
                 cvol = False
         voice_out("Would you like to take a selfie or photograph an object?")
         voice_in()
-    except Exception:
-        print(Exception)
+    except Exception as e:
+        #Print details of the exception
+        print(f"An exception occurred: {type(e).__name__}")
+        print(f"Exception details: {e}")
 
 def commands(vo_in):
     if "help" in vo_in:
@@ -96,12 +95,13 @@ def commands(vo_in):
             case _:
                 print("Nuh uh")
 
-def voice_in(object):
+
+def voice_in(object=0):
     #Start voice input
     #code should not procceed until it gets an input
-    vo_in =  "" #convert voice to string
+    vo_in =  input("enter command") #convert voice to string
     if object:
-        return vo_in
+        vo_in
     return commands(vo_in)
 
 def voice_out(vo_out):
@@ -273,3 +273,5 @@ def findCenterFace(pos):
     midpoint.append(x)
     midpoint.append(y)
     return midpoint
+if __name__ == "__main__":
+    main()
