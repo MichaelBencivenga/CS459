@@ -134,7 +134,7 @@ def take_photo():
             bbox = detection.location_date.relative_bounding_box
             bbox_list = [bbox.xmin, bbox.ymin, bbox.width, bbox.height] #xmin and ymin are the coordiantes of the bottom left of the box
 
-            position = convertFace(bbox_list) #get position from api
+            position = convertFace(bbox_list) #convert coordinates to a position in frame
             voice_out("Your face is" + position + ". Would you like to change the position?")
             if voice_in():
                     voice_out("What would you like the position to be")
@@ -251,9 +251,9 @@ def convertFace(coord):
     curPos = findCenterFace(coord)
     
     if(((curPos[0] <screenr[0]*0.25) and (curPos[1] < screenr[1]*0.25))):
-        pos = "bl" #center of object is in bottom left, as x and y positons are less than edges
+        pos = "bl" #center of face is in bottom left, as x and y positons are less than edges
     elif(((curPos[0] < screenr[0]*0.25 ) and (curPos[1] > screenr[1]*0.75 ))):
-        pos = "tl" #center of object is in top left as x value is less than horizontal bound and y is greater than vertical bound
+        pos = "tl" #center of face is in top left as x value is less than horizontal bound and y is greater than vertical bound
     elif (((curPos[0] > screenr[0]*0.75) and (curPos[1] < screenr[1]/0.25))):
         pos = "br" #in bottom right
     elif(((curPos[0] > screenr[0]*0.75) and (curPos[1] > screenr[1]*0.75))):
@@ -267,9 +267,9 @@ def convertFace(coord):
 
 def findCenterFace(pos):
     #calculate the midpoint of the object
-    midpoint = () #tuple for the x and y coords of the center of the object
-    x = (pos[0] + pos[3]) /2  #midpoint of the xvalues
-    y = (pos[1] + pos[4]) /2  #midpoint of the yvalues
+    midpoint = () #tuple for the x and y coords of the center of the face
+    x = (pos[0] + pos[2]) /2  #midpoint of the xvalues
+    y = (pos[1] + pos[3]) /2  #midpoint of the yvalues
     midpoint.append(x)
     midpoint.append(y)
     return midpoint
