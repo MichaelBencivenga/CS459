@@ -134,7 +134,11 @@ def take_photo():
             bbox = detection.location_date.relative_bounding_box
             bbox_list = [bbox.xmin, bbox.ymin, bbox.width, bbox.height] #xmin and ymin are the coordiantes of the bottom left of the box
 
-            position = convertFace(bbox_list) #convert coordinates to a position in frame
+            xvalue = (bbox_list[0] + bbox_list[2])/2 #finds the midpoint of the xvalue
+            yvalue = (bbox_list[1] + bbox_list[3])/2
+            
+            position = convertFace(xvalue,yvalue) #convert coordinates to a position in frame
+            
             voice_out("Your face is" + position + ". Would you like to change the position?")
             if voice_in():
                     voice_out("What would you like the position to be")
@@ -168,13 +172,32 @@ def take_photo():
             for c in r.boxes.cls:
                 objs.append(names[int(c)]) #adds name of each object detected to list in same order as coordinates
 
-        for o in objs:
+        numObjs = len(objs)
+        count = 0
+        coords2 = coords[0] #gets the tenosr that is at the first element of the list
+
+        while count < numObjs:
             #go through each object detected and tell the user what it is and where it is located
-            obj = objs[o]
-            curcoord = coords[o] #gives the coords of the current object
-            position = convertPos(curcoord) #new function to change coords to a section of the screen
+            obj = objs[count]
+            curcoord = coords2[count,:] #gives the coords of the current object
+    
+            xvalues = (curcoord[0] + curcoord[2])/2 #adds the start x to the width of the bounding box and divides by 2 to find the midpoint
+            yvalues = (curcoord[1] + curcoord[3])/2 #adds the start y to the height of the bounding box and divides by 2 to find the midpoint
+
+            xvalues = xvalues.numpy() #converts from tensor number to numpy number
+            yvalues = yvalues.numpy()
+
+            position = convertPos(xvalues,yvalues)
+    
+            #debugging print statments
+            print(obj)
+            print(curcoord)
+            print(xvalues)
+            print(yvalues)
+            print(position)
+            print(" ")
+            count += 1
             voice_out("The" + obj + "is" + position + ". Would you like to change the position?")
-            
             if voice_in():
                 #user wants to change the position of the current object
                 voice_out("What would you like the position to be")
@@ -216,62 +239,43 @@ def reposition(posw):
             else:
                 voice_out("right")
 
-def convertPos(coord):
-    #take the coord and make it an accepted postion
-    screenr = (640,480) #size of images caputred by default with opencv
-    curPos = findCenterObj(coord)
+def convertPos(x,y):
+     #take the coord and make it an accepted postion
     
-    if(((curPos[0] <screenr[0]*0.25) and (curPos[1] < screenr[1]*0.25))):
+    if(((x < 240) and (y < 320))):
         pos = "bl" #center of object is in bottom left, as x and y positons are less than edges
-    elif(((curPos[0] < screenr[0]*0.25 ) and (curPos[1] > screenr[1]*0.75 ))):
+    elif(((x < 240 ) and (y > 320))):
         pos = "tl" #center of object is in top left as x value is less than horizontal bound and y is greater than vertical bound
-    elif (((curPos[0] > screenr[0]*0.75) and (curPos[1] < screenr[1]/0.25))):
+    elif (((x > 400) and (y < 320))):
         pos = "br" #in bottom right
-    elif(((curPos[0] > screenr[0]*0.75) and (curPos[1] > screenr[1]*0.75))):
+    elif(((x > 400) and (y > 320))):
         pos = "tr" #in top right
-    else:
+    elif((x > 240) and (x <400)):
         pos = "center" #temporary default
-
+    else:
+        pos = "Not in a position"
     #currently no case for the center being on a line or object is in multiple sections
 
     return pos
 
-def findCenterObj(pos):
-    #calculate the midpoint of the object
-    midpoint = () #tuple for the x and y coords of the center of the object
-    x = (pos[0] + pos[3]) /2  #midpoint of the xvalues
-    y = (pos[1] + pos[4]) /2  #midpoint of the yvalues
-    midpoint.append(x)
-    midpoint.append(y)
-    return midpoint
-
-def convertFace(coord):
-    #take the coord and make it an accepted postion
-    screenr = (640,480) #size of images caputred by default with opencv
-    curPos = findCenterFace(coord)
+def convertFace(x,y):
+    #takes the coord of the midpoint and make it an accepted postion
     
-    if(((curPos[0] <screenr[0]*0.25) and (curPos[1] < screenr[1]*0.25))):
-        pos = "bl" #center of face is in bottom left, as x and y positons are less than edges
-    elif(((curPos[0] < screenr[0]*0.25 ) and (curPos[1] > screenr[1]*0.75 ))):
-        pos = "tl" #center of face is in top left as x value is less than horizontal bound and y is greater than vertical bound
-    elif (((curPos[0] > screenr[0]*0.75) and (curPos[1] < screenr[1]/0.25))):
+    if(((x < .24) and (y > .320))):
+        pos = "bl" #center of object is in bottom left, as x and y positons are less than edges
+    elif(((x < .240 ) and (y < .320))):
+        pos = "tl" #center of object is in top left as x value is less than horizontal bound and y is greater than vertical bound
+    elif (((x > .400) and (y > .320))):
         pos = "br" #in bottom right
-    elif(((curPos[0] > screenr[0]*0.75) and (curPos[1] > screenr[1]*0.75))):
+    elif(((x > .400) and (y < .320))):
         pos = "tr" #in top right
-    else:
+    elif((x > .240) and (x < .400)):
         pos = "center" #temporary default
-
+    else:
+        pos = "Not in a position"
     #currently no case for the center being on a line or object is in multiple sections
 
     return pos
 
-def findCenterFace(pos):
-    #calculate the midpoint of the object
-    midpoint = () #tuple for the x and y coords of the center of the face
-    x = (pos[0] + pos[2]) /2  #midpoint of the xvalues
-    y = (pos[1] + pos[3]) /2  #midpoint of the yvalues
-    midpoint.append(x)
-    midpoint.append(y)
-    return midpoint
 if __name__ == "__main__":
     main()
