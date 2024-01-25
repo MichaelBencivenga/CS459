@@ -156,6 +156,7 @@ def processFace(image):
         return position
 
 def checkFace(position,image):
+    #tells the user the location of their face and asks if that position is ok
     voice_out("Your face is" + position + ". Would you like to change the position?")
     if voice_in():
         voice_out("What would you like the position to be")
@@ -211,15 +212,16 @@ def processObjs(image):
         checkObj(obj,position,image)
 
 def checkObj(obj, position, image):
- voice_out("The" + obj + "is" + position + ". Would you like to change the position?")
- if voice_in():
-    #user wants to change the position of the current object
-    voice_out("What would you like the position to be")
-    reposition(voice_in())
- else:
-    voice_out("Done")
-    cv.imwrite("Final.jpg", image) #saves the image under the name Final in a jpeg format
-    cv.imshow("Final",image) #displays the final image, is this needed as user may be completely blind??
+    #tells the user the current position of the object and asks if that location is correct
+    voice_out("The" + obj + "is" + position + ". Would you like to change the position?")
+    if voice_in():
+        #user wants to change the position of the current object
+        voice_out("What would you like the position to be")
+        reposition(voice_in())
+    else:
+        voice_out("Done")
+        cv.imwrite("Final.jpg", image) #saves the image under the name Final in a jpeg format
+        cv.imshow("Final",image) #displays the final image, is this needed as user may be completely blind??
 
 
 def reposition(posw):
