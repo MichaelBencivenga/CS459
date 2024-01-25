@@ -120,6 +120,7 @@ def take_photo():
             #Take a little silly photo
             #selfie
             image = webcam.read()
+            image = cv.flip(image,1) #flips the image horizontally
 
             image2 = cv.cvtColor(image,cv.COLOR_BGR2RGB) #changes color scale to allow mediapipe image processing
             results = mp_face_detection.process(image) #uses face detection model to find faces in image
@@ -160,6 +161,7 @@ def take_photo():
             voice_out("Say yes when ready")
             voice_in()
             image = webcam.read()
+            image = cv.flip(image,1) #flips image horizontally
 
         results = model(image) #runs the object detection model on image taken
         names = model.names
@@ -182,7 +184,7 @@ def take_photo():
             curcoord = coords2[count,:] #gives the coords of the current object
     
             xvalues = (curcoord[0] + curcoord[2])/2 #adds the start x to the width of the bounding box and divides by 2 to find the midpoint
-            yvalues = (curcoord[1] + curcoord[3])/2 #adds the start y to the height of the bounding box and divides by 2 to find the midpoint
+            yvalues = (curcoord[1] + abs(curcoord[1] - curcoord[3]))/2 #adds the start y to the height of the bounding box and divides by 2 to find the midpoint
 
             xvalues = xvalues.numpy() #converts from tensor number to numpy number
             yvalues = yvalues.numpy()
