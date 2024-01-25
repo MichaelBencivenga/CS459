@@ -184,7 +184,7 @@ def take_photo():
             curcoord = coords2[count,:] #gives the coords of the current object
     
             xvalues = (curcoord[0] + curcoord[2])/2 #adds the start x to the width of the bounding box and divides by 2 to find the midpoint
-            yvalues = (curcoord[1] + abs(curcoord[1] - curcoord[3]))/2 #adds the start y to the height of the bounding box and divides by 2 to find the midpoint
+            yvalues = (curcoord[1] + abs(curcoord[1] - curcoord[3])) #adds the start y to the starting point minus the total height to find the midpoint on the y-axis
 
             xvalues = xvalues.numpy() #converts from tensor number to numpy number
             yvalues = yvalues.numpy()
