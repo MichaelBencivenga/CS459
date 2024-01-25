@@ -68,16 +68,16 @@ def commands(vo_in):
                 main()
             case "selfie":
                 cameramode = 0
-                image = take_photo()
+                image = take_photo(cameramode)
                 curpos = processFace(image)
                 checkFace(curpos,image)
             case "object":
                 cameramode = 1
-                image = take_photo()
+                image = take_photo(cameramode)
                 curpos = processObjs(image)
             case "change object": #repeat effect but I felt like we needed the option to change object.
                 cameramode = 1
-                take_photo() 
+                take_photo(cameramode) 
             case "position?":#I cant think of the correct word but like the framing of the object? Like centered and all that
                 voice_out("#Variable storing current object position") 
             case "yes":
@@ -110,7 +110,7 @@ def voice_out(vo_out):
     engine.say(vo_out)
     engine.runAndWait()
 
-def take_photo():
+def take_photo(cameramode):
 
     if cameramode == 0:
         #Selfie option
@@ -125,8 +125,6 @@ def take_photo():
             image = cv.flip(image,1) #flips the image horizontally
             
             return image
-        
-
     else:
         #Object option
         voice_out("Are you ready for the static image?")
@@ -226,6 +224,8 @@ def checkObj(obj, position, image):
 
 
 def reposition(posw):
+    #should probably make one for objects and one for face beceause they are processed differently
+    #could just be a while loop that takes pics processes them and gives directions until current position and the goal position match
     #Position wanted
     #Numbers are in no way shape or form final but this was my idea of how to interpret it
     #could probably go more in depth like allowing center top right. Nothing coming to mind rn though
