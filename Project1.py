@@ -3,7 +3,6 @@ import pyttsx3
 #imports for taking images and face + object detection
 import cv2 as cv
 import mediapipe as mp
-import torch
 import ultralytics
 #setting up object detection using the ultralytics library and yolov8 model and training set
 from ultralytics import YOLO
@@ -68,10 +67,13 @@ def commands(vo_in):
                 main()
             case "selfie":
                 cameramode = 0
-                take_photo()
+                image = take_photo()
+                curpos = processFace(image)
+                checkFace(curpos,image)
             case "object":
                 cameramode = 1
-                take_photo()
+                image = take_photo()
+                curpos = processObjs(image)
             case "change object": #repeat effect but I felt like we needed the option to change object.
                 cameramode = 1
                 take_photo() 
@@ -119,69 +121,108 @@ def take_photo():
             #Take a little silly photo
             #selfie
             image = webcam.read()
+            image = cv.flip(image,1) #flips the image horizontally
+            
+            return image
+        
 
-            image2 = cv.cvtColor(image,cv.COLOR_BGR2RGB) #changes color scale to allow mediapipe image processing
-            results = mp_face_detection.process(image) #uses face detection model to find faces in image
-            image2 = cv.cvtColor(image,cv.COLOR_RGB2BGR) #return image to original color scale
-
-            #draw face detection annotations 
-            if results.detections:
-                for detection in results.detections:
-                    mp_drawing.draw_detection(image2,detection) #all changes+annotations made to seperate image so clean version can be saved
-
-            #gets location of face
-            bbox = detection.location_date.relative_bounding_box
-            bbox_list = [bbox.xmin, bbox.ymin, bbox.width, bbox.height] #xmin and ymin are the coordiantes of the bottom left of the box
-
-            position = convertFace(bbox_list) #get position from api
-            voice_out("Your face is" + position + ". Would you like to change the position?")
-            if voice_in():
-                    voice_out("What would you like the position to be")
-                    reposition(voice_in())
-            else:
-                voice_out("Done")
-                voice_in()
-                cv.imwrite("Final.jpg", image) #saves the image under the name Final in a jpeg format
-                cv.imshow("Final",image) #displays the final image, is this needed as user may be completely blind??
     else:
         #Object option
-        #initializing lists for positioning
-        names = []
-        objs = []
-        coords = []
-
-        voice_out("Are you ready for the selfie?")
+        voice_out("Are you ready for the static image?")
         if voice_in() == False:
             voice_out("Say yes when ready")
             voice_in()
             image = webcam.read()
+            image = cv.flip(image,1) #flips image horizontally
 
-        results = model(image) #runs the object detection model on image taken
-        names = model.names
+    return image
 
-        #stores objects detected and their placements in lists
-        for r in results:
-            boxes = r.boxes #put bounding box detections into a list
-            coords.append(boxes.xyxy) #list of the xy coordiantes, first coord is bottom left and second is top right
+def processFace(image):
+    image2 = cv.cvtColor(image,cv.COLOR_BGR2RGB) #changes color scale to allow mediapipe image processing
+    results = mp_face_detection.process(image) #uses face detection model to find faces in image
+    image2 = cv.cvtColor(image,cv.COLOR_RGB2BGR) #return image to original color scale
 
-            for c in r.boxes.cls:
-                objs.append(names[int(c)]) #adds name of each object detected to list in same order as coordinates
+    #draw face detection annotations 
+    if results.detections:
+        for detection in results.detections:
+            mp_drawing.draw_detection(image2,detection) #all changes+annotations made to seperate image so clean version can be saved
 
-        for o in objs:
-            #go through each object detected and tell the user what it is and where it is located
-            obj = objs[o]
-            curcoord = coords[o] #gives the coords of the current object
-            position = convertPos(curcoord) #new function to change coords to a section of the screen
-            voice_out("The" + obj + "is" + position + ". Would you like to change the position?")
+        #gets location of face
+        bbox = detection.location_date.relative_bounding_box
+        bbox_list = [bbox.xmin, bbox.ymin, bbox.width, bbox.height] #xmin and ymin are the coordiantes of the bottom left of the box
+
+        xvalue = (bbox_list[0] + bbox_list[2])/2 #finds the midpoint of the xvalue
+        yvalue = (bbox_list[1] + bbox_list[3])/2
             
-            if voice_in():
-                #user wants to change the position of the current object
-                voice_out("What would you like the position to be")
-                reposition(voice_in())
-            else:
-                voice_out("Done")
-                cv.imwrite("Final.jpg", image) #saves the image under the name Final in a jpeg format
-                cv.imshow("Final",image) #displays the final image, is this needed as user may be completely blind??
+        position = convertFace(xvalue,yvalue) #convert coordinates to a position in frame
+        return position
+
+def checkFace(position,image):
+    voice_out("Your face is" + position + ". Would you like to change the position?")
+    if voice_in():
+        voice_out("What would you like the position to be")
+        reposition(voice_in())
+    else:
+        voice_out("Done")
+        voice_in()
+        cv.imwrite("Final.jpg", image) #saves the image under the name Final in a jpeg format
+        cv.imshow("Final",image) #displays the final image, is this needed as user may be completely blind??
+        voice_out("Image Saved")
+
+def processObjs(image):
+    #initializing lists for positioning
+    names = []
+    objs = []
+    coords = []
+    results = model(image) #runs the object detection model on image taken
+    names = model.names
+
+    #stores objects detected and their placements in lists
+    for r in results:
+        boxes = r.boxes #put bounding box detections into a list
+        coords.append(boxes.xyxy) #list of the xy coordiantes, first coord is bottom left and second is top right
+
+        for c in r.boxes.cls:
+            objs.append(names[int(c)]) #adds name of each object detected to list in same order as coordinates
+
+    numObjs = len(objs)
+    count = 0
+    coords2 = coords[0] #gets the tenosr that is at the first element of the list
+
+    while count < numObjs:
+        #go through each object detected and tell the user what it is and where it is located
+        obj = objs[count]
+        curcoord = coords2[count,:] #gives the coords of the current object
+    
+        xvalues = (curcoord[0] + curcoord[2])/2 #adds the start x to the width of the bounding box and divides by 2 to find the midpoint
+        yvalues = (curcoord[1] + abs(curcoord[1] - curcoord[3])) #adds the start y to the starting point minus the total height to find the midpoint on the y-axis
+
+        xvalues = xvalues.numpy() #converts from tensor number to numpy number
+        yvalues = yvalues.numpy()
+
+        position = convertPos(xvalues,yvalues)
+    
+        #debugging print statments
+        print(obj)
+        print(curcoord)
+        print(xvalues)
+        print(yvalues)
+        print(position)
+        print(" ")
+        count += 1
+        checkObj(obj,position,image)
+
+def checkObj(obj, position, image):
+ voice_out("The" + obj + "is" + position + ". Would you like to change the position?")
+ if voice_in():
+    #user wants to change the position of the current object
+    voice_out("What would you like the position to be")
+    reposition(voice_in())
+ else:
+    voice_out("Done")
+    cv.imwrite("Final.jpg", image) #saves the image under the name Final in a jpeg format
+    cv.imshow("Final",image) #displays the final image, is this needed as user may be completely blind??
+
 
 def reposition(posw):
     #Position wanted
@@ -215,62 +256,43 @@ def reposition(posw):
             else:
                 voice_out("right")
 
-def convertPos(coord):
-    #take the coord and make it an accepted postion
-    screenr = (640,480) #size of images caputred by default with opencv
-    curPos = findCenterObj(coord)
+def convertPos(x,y):
+     #take the coord and make it an accepted postion
     
-    if(((curPos[0] <screenr[0]*0.25) and (curPos[1] < screenr[1]*0.25))):
+    if(((x < 240) and (y < 320))):
         pos = "bl" #center of object is in bottom left, as x and y positons are less than edges
-    elif(((curPos[0] < screenr[0]*0.25 ) and (curPos[1] > screenr[1]*0.75 ))):
+    elif(((x < 240 ) and (y > 320))):
         pos = "tl" #center of object is in top left as x value is less than horizontal bound and y is greater than vertical bound
-    elif (((curPos[0] > screenr[0]*0.75) and (curPos[1] < screenr[1]/0.25))):
+    elif (((x > 400) and (y < 320))):
         pos = "br" #in bottom right
-    elif(((curPos[0] > screenr[0]*0.75) and (curPos[1] > screenr[1]*0.75))):
+    elif(((x > 400) and (y > 320))):
         pos = "tr" #in top right
-    else:
+    elif((x > 240) and (x <400)):
         pos = "center" #temporary default
-
+    else:
+        pos = "Not in a position"
     #currently no case for the center being on a line or object is in multiple sections
 
     return pos
 
-def findCenterObj(pos):
-    #calculate the midpoint of the object
-    midpoint = () #tuple for the x and y coords of the center of the object
-    x = (pos[0] + pos[3]) /2  #midpoint of the xvalues
-    y = (pos[1] + pos[4]) /2  #midpoint of the yvalues
-    midpoint.append(x)
-    midpoint.append(y)
-    return midpoint
-
-def convertFace(coord):
-    #take the coord and make it an accepted postion
-    screenr = (640,480) #size of images caputred by default with opencv
-    curPos = findCenterFace(coord)
+def convertFace(x,y):
+    #takes the coord of the midpoint and make it an accepted postion
     
-    if(((curPos[0] <screenr[0]*0.25) and (curPos[1] < screenr[1]*0.25))):
+    if(((x < .24) and (y > .320))):
         pos = "bl" #center of object is in bottom left, as x and y positons are less than edges
-    elif(((curPos[0] < screenr[0]*0.25 ) and (curPos[1] > screenr[1]*0.75 ))):
+    elif(((x < .240 ) and (y < .320))):
         pos = "tl" #center of object is in top left as x value is less than horizontal bound and y is greater than vertical bound
-    elif (((curPos[0] > screenr[0]*0.75) and (curPos[1] < screenr[1]/0.25))):
+    elif (((x > .400) and (y > .320))):
         pos = "br" #in bottom right
-    elif(((curPos[0] > screenr[0]*0.75) and (curPos[1] > screenr[1]*0.75))):
+    elif(((x > .400) and (y < .320))):
         pos = "tr" #in top right
-    else:
+    elif((x > .240) and (x < .400)):
         pos = "center" #temporary default
-
+    else:
+        pos = "Not in a position"
     #currently no case for the center being on a line or object is in multiple sections
 
     return pos
 
-def findCenterFace(pos):
-    #calculate the midpoint of the object
-    midpoint = () #tuple for the x and y coords of the center of the object
-    x = (pos[0] + pos[3]) /2  #midpoint of the xvalues
-    y = (pos[1] + pos[4]) /2  #midpoint of the yvalues
-    midpoint.append(x)
-    midpoint.append(y)
-    return midpoint
 if __name__ == "__main__":
     main()

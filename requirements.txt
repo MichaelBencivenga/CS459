@@ -1,0 +1,2 @@
+# File Containing all of the pip installs required to run the code
+# pip install SpeechRecognition
