@@ -3,7 +3,6 @@ import pyttsx3
 #imports for taking images and face + object detection
 import cv2 as cv
 import mediapipe as mp
-import torch
 import ultralytics
 
 #setting up object detection using the ultralytics library and yolov8 model and training set
@@ -69,10 +68,13 @@ def commands(vo_in):
                 main()
             case "selfie":
                 cameramode = 0
-                take_photo()
+                image = take_photo()
+                curpos = processFace(image)
+                checkFace(curpos,image)
             case "object":
                 cameramode = 1
-                take_photo()
+                image = take_photo()
+                curpos = processObjs(image)
             case "change object": #repeat effect but I felt like we needed the option to change object.
                 cameramode = 1
                 take_photo() 
@@ -121,93 +123,107 @@ def take_photo():
             #selfie
             image = webcam.read()
             image = cv.flip(image,1) #flips the image horizontally
-
-            image2 = cv.cvtColor(image,cv.COLOR_BGR2RGB) #changes color scale to allow mediapipe image processing
-            results = mp_face_detection.process(image) #uses face detection model to find faces in image
-            image2 = cv.cvtColor(image,cv.COLOR_RGB2BGR) #return image to original color scale
-
-            #draw face detection annotations 
-            if results.detections:
-                for detection in results.detections:
-                    mp_drawing.draw_detection(image2,detection) #all changes+annotations made to seperate image so clean version can be saved
-
-            #gets location of face
-            bbox = detection.location_date.relative_bounding_box
-            bbox_list = [bbox.xmin, bbox.ymin, bbox.width, bbox.height] #xmin and ymin are the coordiantes of the bottom left of the box
-
-            xvalue = (bbox_list[0] + bbox_list[2])/2 #finds the midpoint of the xvalue
-            yvalue = (bbox_list[1] + bbox_list[3])/2
             
-            position = convertFace(xvalue,yvalue) #convert coordinates to a position in frame
-            
-            voice_out("Your face is" + position + ". Would you like to change the position?")
-            if voice_in():
-                    voice_out("What would you like the position to be")
-                    reposition(voice_in())
-            else:
-                voice_out("Done")
-                voice_in()
-                cv.imwrite("Final.jpg", image) #saves the image under the name Final in a jpeg format
-                cv.imshow("Final",image) #displays the final image, is this needed as user may be completely blind??
+            return image
+        
+
     else:
         #Object option
-        #initializing lists for positioning
-        names = []
-        objs = []
-        coords = []
-
-        voice_out("Are you ready for the selfie?")
+        voice_out("Are you ready for the static image?")
         if voice_in() == False:
             voice_out("Say yes when ready")
             voice_in()
             image = webcam.read()
             image = cv.flip(image,1) #flips image horizontally
 
-        results = model(image) #runs the object detection model on image taken
-        names = model.names
+    return image
 
-        #stores objects detected and their placements in lists
-        for r in results:
-            boxes = r.boxes #put bounding box detections into a list
-            coords.append(boxes.xyxy) #list of the xy coordiantes, first coord is bottom left and second is top right
+def processFace(image):
+    image2 = cv.cvtColor(image,cv.COLOR_BGR2RGB) #changes color scale to allow mediapipe image processing
+    results = mp_face_detection.process(image) #uses face detection model to find faces in image
+    image2 = cv.cvtColor(image,cv.COLOR_RGB2BGR) #return image to original color scale
 
-            for c in r.boxes.cls:
-                objs.append(names[int(c)]) #adds name of each object detected to list in same order as coordinates
+    #draw face detection annotations 
+    if results.detections:
+        for detection in results.detections:
+            mp_drawing.draw_detection(image2,detection) #all changes+annotations made to seperate image so clean version can be saved
 
-        numObjs = len(objs)
-        count = 0
-        coords2 = coords[0] #gets the tenosr that is at the first element of the list
+        #gets location of face
+        bbox = detection.location_date.relative_bounding_box
+        bbox_list = [bbox.xmin, bbox.ymin, bbox.width, bbox.height] #xmin and ymin are the coordiantes of the bottom left of the box
 
-        while count < numObjs:
-            #go through each object detected and tell the user what it is and where it is located
-            obj = objs[count]
-            curcoord = coords2[count,:] #gives the coords of the current object
+        xvalue = (bbox_list[0] + bbox_list[2])/2 #finds the midpoint of the xvalue
+        yvalue = (bbox_list[1] + bbox_list[3])/2
+            
+        position = convertFace(xvalue,yvalue) #convert coordinates to a position in frame
+        return position
+
+def checkFace(position,image):
+    voice_out("Your face is" + position + ". Would you like to change the position?")
+    if voice_in():
+        voice_out("What would you like the position to be")
+        reposition(voice_in())
+    else:
+        voice_out("Done")
+        voice_in()
+        cv.imwrite("Final.jpg", image) #saves the image under the name Final in a jpeg format
+        cv.imshow("Final",image) #displays the final image, is this needed as user may be completely blind??
+        voice_out("Image Saved")
+
+def processObjs(image):
+    #initializing lists for positioning
+    names = []
+    objs = []
+    coords = []
+    results = model(image) #runs the object detection model on image taken
+    names = model.names
+
+    #stores objects detected and their placements in lists
+    for r in results:
+        boxes = r.boxes #put bounding box detections into a list
+        coords.append(boxes.xyxy) #list of the xy coordiantes, first coord is bottom left and second is top right
+
+        for c in r.boxes.cls:
+            objs.append(names[int(c)]) #adds name of each object detected to list in same order as coordinates
+
+    numObjs = len(objs)
+    count = 0
+    coords2 = coords[0] #gets the tenosr that is at the first element of the list
+
+    while count < numObjs:
+        #go through each object detected and tell the user what it is and where it is located
+        obj = objs[count]
+        curcoord = coords2[count,:] #gives the coords of the current object
     
-            xvalues = (curcoord[0] + curcoord[2])/2 #adds the start x to the width of the bounding box and divides by 2 to find the midpoint
-            yvalues = (curcoord[1] + abs(curcoord[1] - curcoord[3])) #adds the start y to the starting point minus the total height to find the midpoint on the y-axis
+        xvalues = (curcoord[0] + curcoord[2])/2 #adds the start x to the width of the bounding box and divides by 2 to find the midpoint
+        yvalues = (curcoord[1] + abs(curcoord[1] - curcoord[3])) #adds the start y to the starting point minus the total height to find the midpoint on the y-axis
 
-            xvalues = xvalues.numpy() #converts from tensor number to numpy number
-            yvalues = yvalues.numpy()
+        xvalues = xvalues.numpy() #converts from tensor number to numpy number
+        yvalues = yvalues.numpy()
 
-            position = convertPos(xvalues,yvalues)
+        position = convertPos(xvalues,yvalues)
     
-            #debugging print statments
-            print(obj)
-            print(curcoord)
-            print(xvalues)
-            print(yvalues)
-            print(position)
-            print(" ")
-            count += 1
-            voice_out("The" + obj + "is" + position + ". Would you like to change the position?")
-            if voice_in():
-                #user wants to change the position of the current object
-                voice_out("What would you like the position to be")
-                reposition(voice_in())
-            else:
-                voice_out("Done")
-                cv.imwrite("Final.jpg", image) #saves the image under the name Final in a jpeg format
-                cv.imshow("Final",image) #displays the final image, is this needed as user may be completely blind??
+        #debugging print statments
+        print(obj)
+        print(curcoord)
+        print(xvalues)
+        print(yvalues)
+        print(position)
+        print(" ")
+        count += 1
+        checkObj(obj,position,image)
+
+def checkObj(obj, position, image):
+ voice_out("The" + obj + "is" + position + ". Would you like to change the position?")
+ if voice_in():
+    #user wants to change the position of the current object
+    voice_out("What would you like the position to be")
+    reposition(voice_in())
+ else:
+    voice_out("Done")
+    cv.imwrite("Final.jpg", image) #saves the image under the name Final in a jpeg format
+    cv.imshow("Final",image) #displays the final image, is this needed as user may be completely blind??
+
 
 def reposition(posw):
     #Position wanted
