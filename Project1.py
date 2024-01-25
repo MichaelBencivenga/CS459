@@ -5,7 +5,6 @@ import cv2 as cv
 import mediapipe as mp
 import torch
 import ultralytics
-
 #setting up object detection using the ultralytics library and yolov8 model and training set
 from ultralytics import YOLO
 from PIL import Image
