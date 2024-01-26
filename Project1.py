@@ -4,6 +4,8 @@ import pyttsx3
 import cv2 as cv
 import mediapipe as mp
 import ultralytics
+#import speech to text file
+import speech_recognition as sr
 #setting up object detection using the ultralytics library and yolov8 model and training set
 from ultralytics import YOLO
 from PIL import Image
@@ -26,11 +28,10 @@ def main():
         #engine.onError(voice_output, "VoiceError")
         global engine 
         engine = pyttsx3.init()
-        engine.setProperty('volume', 0.5)
+        engine.setProperty('volume', 0.6)
         voice_out("Hello welcome to the program, would you like to change the volume?")
         cvol = False #change volume
         if voice_in():
-            #change volume
             cvol = True
         while cvol == True:
             voice_out("what would you like the volume set to out of 100?")
@@ -56,7 +57,7 @@ def commands(vo_in):
             case _: 
                 print("Nuh uh")
     elif vo_in.isnumeric():
-        return vo_in / 100
+        return int(vo_in)/100
     else:
         match vo_in:
             case "commands":
@@ -98,13 +99,16 @@ def commands(vo_in):
 
 
 def voice_in(object=0):
-    #Start voice input
-    #code should not procceed until it gets an input
-    vo_in =  input("enter command") #convert voice to string
-    if object:
-        vo_in
-    return commands(vo_in)
-
+    try:
+        r = sr.Recognizer()
+        with sr.Microphone(sample_rate=16000) as source:
+            audio = r.listen(source, timeout=10, phrase_time_limit=3)
+            vo_in = r.recognize_google(audio)
+        if object:
+            return vo_in
+        return commands(vo_in)
+    except(sr.WaitTimeoutError):
+        return 1
 def voice_out(vo_out):
     engine.say(vo_out)
     engine.runAndWait()
