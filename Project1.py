@@ -68,16 +68,16 @@ def commands(vo_in):
                 main()
             case "selfie":
                 cameramode = 0
-                image = take_photo()
+                image = take_photo(cameramode)
                 curpos = processFace(image)
                 checkFace(curpos,image)
             case "object":
                 cameramode = 1
-                image = take_photo()
+                image = take_photo(cameramode)
                 curpos = processObjs(image)
             case "change object": #repeat effect but I felt like we needed the option to change object.
                 cameramode = 1
-                take_photo() 
+                take_photo(cameramode) 
             case "position?":#I cant think of the correct word but like the framing of the object? Like centered and all that
                 voice_out("#Variable storing current object position") 
             case "yes":
@@ -113,7 +113,7 @@ def voice_out(vo_out):
     engine.say(vo_out)
     engine.runAndWait()
 
-def take_photo():
+def take_photo(cameramode):
 
     if cameramode == 0:
         #Selfie option
@@ -128,8 +128,6 @@ def take_photo():
             image = cv.flip(image,1) #flips the image horizontally
             
             return image
-        
-
     else:
         #Object option
         voice_out("Are you ready for the static image?")
@@ -162,6 +160,7 @@ def processFace(image):
         return position
 
 def checkFace(position,image):
+    #tells the user the location of their face and asks if that position is ok
     voice_out("Your face is" + position + ". Would you like to change the position?")
     if voice_in():
         voice_out("What would you like the position to be")
@@ -217,18 +216,21 @@ def processObjs(image):
         checkObj(obj,position,image)
 
 def checkObj(obj, position, image):
- voice_out("The" + obj + "is" + position + ". Would you like to change the position?")
- if voice_in():
-    #user wants to change the position of the current object
-    voice_out("What would you like the position to be")
-    reposition(voice_in())
- else:
-    voice_out("Done")
-    cv.imwrite("Final.jpg", image) #saves the image under the name Final in a jpeg format
-    cv.imshow("Final",image) #displays the final image, is this needed as user may be completely blind??
+    #tells the user the current position of the object and asks if that location is correct
+    voice_out("The" + obj + "is" + position + ". Would you like to change the position?")
+    if voice_in():
+        #user wants to change the position of the current object
+        voice_out("What would you like the position to be")
+        reposition(voice_in())
+    else:
+        voice_out("Done")
+        cv.imwrite("Final.jpg", image) #saves the image under the name Final in a jpeg format
+        cv.imshow("Final",image) #displays the final image, is this needed as user may be completely blind??
 
 
 def reposition(posw):
+    #should probably make one for objects and one for face beceause they are processed differently
+    #could just be a while loop that takes pics processes them and gives directions until current position and the goal position match
     #Position wanted
     #Numbers are in no way shape or form final but this was my idea of how to interpret it
     #could probably go more in depth like allowing center top right. Nothing coming to mind rn though
