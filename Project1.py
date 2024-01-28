@@ -10,9 +10,6 @@ import speech_recognition as sr
 import PIL
 from ultralytics import YOLO
 from PIL import Image
-
-import time
-
 ultralytics.checks()
 model = YOLO("yolov8n.pt") #loads the pretrained yolov8 model to save time when application is in use
 
@@ -135,7 +132,7 @@ def take_photo(cameramode):
     return image
 
 def processFace(image):
-    image2 = cv.cvtColor(image,cv.COLOR_BGR2RGB) #changes color scale to allow mediapipe image processing
+    image2 = cv.cvtColor(np.array(image),cv.COLOR_BGR2RGB) #changes color scale to allow mediapipe image processing
     results = mp_face_detection.process(image2) #uses face detection model to find faces in image
     image2 = cv.cvtColor(image2,cv.COLOR_RGB2BGR) #return image to original color scale
 
@@ -156,6 +153,7 @@ def processFace(image):
 
 def checkFace(position,image):
     #tells the user the location of their face and asks if that position is ok
+    print(position)
     voice_out("Your face is" + position + ". Would you like to change the position?")
     if voice_in():
         voice_out("What would you like the position to be")
