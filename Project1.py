@@ -10,6 +10,9 @@ import speech_recognition as sr
 import PIL
 from ultralytics import YOLO
 from PIL import Image
+
+import time
+
 ultralytics.checks()
 model = YOLO("yolov8n.pt") #loads the pretrained yolov8 model to save time when application is in use
 
@@ -156,7 +159,7 @@ def checkFace(position,image):
     voice_out("Your face is" + position + ". Would you like to change the position?")
     if voice_in():
         voice_out("What would you like the position to be")
-        reposition(voice_in())
+        rePosFace(voice_in())
     else:
         voice_out("Done")
         voice_in()
@@ -213,7 +216,7 @@ def checkObj(obj, position, image):
     if voice_in():
         #user wants to change the position of the current object
         voice_out("What would you like the position to be")
-        reposition(voice_in())
+        rePosObj(voice_in())
     else:
         voice_out("Done")
         cv.imwrite("Final.jpg", image) #saves the image under the name Final in a jpeg format
