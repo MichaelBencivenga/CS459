@@ -7,6 +7,7 @@ import ultralytics
 #import speech to text file
 import speech_recognition as sr
 #setting up object detection using the ultralytics library and yolov8 model and training set
+import PIL
 from ultralytics import YOLO
 from PIL import Image
 ultralytics.checks()
@@ -24,17 +25,17 @@ webcam = cv.VideoCapture(0)
 cameramode = False
 
 def main():
-    try:
+    #try:
         #engine.onError(voice_output, "VoiceError")
         global engine 
         engine = pyttsx3.init()
         engine.setProperty('volume', 0.6)
         voice_out("Hello welcome to the program. Would you like to take a selfie, or photograph an object?")
         voice_in()
-    except Exception as e:
+    #except Exception as e:
         #Print details of the exception
-        print(f"An exception occurred: {type(e).__name__}")
-        print(f"Exception details: {e}")
+        #print(f"An exception occurred: {type(e).__name__}")
+        #print(f"Exception details: {e}")
 
 def commands(vo_in):
     if "help" in vo_in:
@@ -83,6 +84,8 @@ def commands(vo_in):
                 return "tr"
             case _:
                 print("Nuh uh")
+                voice_out("Command not recognized")
+                voice_in()
 
 
 def voice_in(object=0):
@@ -101,7 +104,7 @@ def voice_out(vo_out):
     engine.runAndWait()
 
 def take_photo(cameramode):
-
+    image = PIL.Image.open("Batman.png")
     if cameramode == 0:
         #Selfie option
         
@@ -110,10 +113,9 @@ def take_photo(cameramode):
             voice_out("Say yes when ready")
             voice_in()
             #Take a little silly photo
-            #selfie
-            image = webcam.read()
+            succ, image = webcam.read()
             image = cv.flip(image,1) #flips the image horizontally
-            
+            image.show()
             return image
     else:
         #Object option
@@ -121,15 +123,17 @@ def take_photo(cameramode):
         if voice_in() == False:
             voice_out("Say yes when ready")
             voice_in()
-            image = webcam.read()
+            succ, image = webcam.read()
             image = cv.flip(image,1) #flips image horizontally
+            image.show()
+            return image
 
     return image
 
 def processFace(image):
     image2 = cv.cvtColor(image,cv.COLOR_BGR2RGB) #changes color scale to allow mediapipe image processing
-    results = mp_face_detection.process(image) #uses face detection model to find faces in image
-    image2 = cv.cvtColor(image,cv.COLOR_RGB2BGR) #return image to original color scale
+    results = mp_face_detection.process(image2) #uses face detection model to find faces in image
+    image2 = cv.cvtColor(image2,cv.COLOR_RGB2BGR) #return image to original color scale
 
     #draw face detection annotations 
     if results.detections:
