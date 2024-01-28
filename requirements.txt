@@ -1,6 +1,7 @@
 # File Containing all of the pip installs required to run the code
 # pip install SpeechRecognition
-#pip install opencv-python
-#pip install ultralytics
-#pip install mediapipe
+# pip install opencv-python
+# pip install ultralytics
+# pip install mediapipe
+# pip install pyttsx3
 #sudo apt install python3-pyaudio
