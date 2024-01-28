@@ -7,11 +7,9 @@ import ultralytics
 #import speech to text file
 import speech_recognition as sr
 #setting up object detection using the ultralytics library and yolov8 model and training set
+import PIL
 from ultralytics import YOLO
 from PIL import Image
-
-import time
-
 ultralytics.checks()
 model = YOLO("yolov8n.pt") #loads the pretrained yolov8 model to save time when application is in use
 
@@ -27,28 +25,17 @@ webcam = cv.VideoCapture(0)
 cameramode = False
 
 def main():
-    try:
+    #try:
         #engine.onError(voice_output, "VoiceError")
         global engine 
         engine = pyttsx3.init()
         engine.setProperty('volume', 0.6)
-        voice_out("Hello welcome to the program, would you like to change the volume?")
-        cvol = False #change volume
-        if voice_in():
-            cvol = True
-        while cvol == True:
-            voice_out("what would you like the volume set to out of 100?")
-            volume = voice_in()
-            engine.setProperty('volume', volume)
-            voice_out("Is this volume good?")
-            if voice_in():
-                cvol = False
-        voice_out("Would you like to take a selfie or photograph an object?")
+        voice_out("Hello welcome to the program. Would you like to take a selfie, or photograph an object?")
         voice_in()
-    except Exception as e:
+    #except Exception as e:
         #Print details of the exception
-        print(f"An exception occurred: {type(e).__name__}")
-        print(f"Exception details: {e}")
+        #print(f"An exception occurred: {type(e).__name__}")
+        #print(f"Exception details: {e}")
 
 def commands(vo_in):
     if "help" in vo_in:
@@ -70,17 +57,15 @@ def commands(vo_in):
                 #idk about this one
                 main()
             case "selfie":
-                cameramode = 0
-                image = take_photo(cameramode)
+                image = take_photo(0)
                 curpos = processFace(image)
                 checkFace(curpos,image)
             case "object":
-                cameramode = 1
-                image = take_photo(cameramode)
+                image = take_photo(1)
                 curpos = processObjs(image)
             case "change object": #repeat effect but I felt like we needed the option to change object.
-                cameramode = 1
-                take_photo(cameramode) 
+                take_photo(1) 
+                curpos = processObjs(image)
             case "position?":#I cant think of the correct word but like the framing of the object? Like centered and all that
                 voice_out("#Variable storing current object position") 
             case "yes":
@@ -99,6 +84,8 @@ def commands(vo_in):
                 return "tr"
             case _:
                 print("Nuh uh")
+                voice_out("Command not recognized")
+                voice_in()
 
 
 def voice_in(object=0):
@@ -110,7 +97,7 @@ def voice_in(object=0):
         if object:
             return vo_in
         return commands(vo_in)
-    except(sr.WaitTimeoutError):
+    except sr.WaitTimeoutError:
         return 1
 
 def voice_out(vo_out):
@@ -118,7 +105,7 @@ def voice_out(vo_out):
     engine.runAndWait()
 
 def take_photo(cameramode):
-
+    image = PIL.Image.open("Batman.png")
     if cameramode == 0:
         #Selfie option
         
@@ -127,10 +114,9 @@ def take_photo(cameramode):
             voice_out("Say yes when ready")
             voice_in()
             #Take a little silly photo
-            #selfie
-            success, image = webcam.read()
+            succ, image = webcam.read()
             image = cv.flip(image,1) #flips the image horizontally
-            
+            image.show()
             return image
     else:
         #Object option
@@ -138,8 +124,10 @@ def take_photo(cameramode):
         if voice_in() == False:
             voice_out("Say yes when ready")
             voice_in()
-            image = webcam.read()
+            succ, image = webcam.read()
             image = cv.flip(image,1) #flips image horizontally
+            image.show()
+            return image
 
     return image
 
@@ -153,26 +141,22 @@ def processFace(image):
         for detection in results.detections:
             mp_drawing.draw_detection(image2,detection) #all changes+annotations made to seperate image so clean version can be saved
 
-            #gets location of face
-            bbox = detection.location_date.relative_bounding_box
-            bbox_list = [bbox.xmin, bbox.ymin, bbox.width, bbox.height] #xmin and ymin are the coordiantes of the bottom left of the box
+        #gets location of face
+        bbox = detection.location_date.relative_bounding_box
+        bbox_list = [bbox.xmin, bbox.ymin, bbox.width, bbox.height] #xmin and ymin are the coordiantes of the bottom left of the box
 
-            xvalue = (bbox_list[0] + bbox_list[2])/2 #finds the midpoint of the xvalue
-            yvalue = (bbox_list[1] + bbox_list[3])/2
-    else:
-        # if no face is detected
-        xvalue = None
-        yvalue = None
-
-    position = convertFace(xvalue,yvalue) #convert coordinates to a position in frame
-    return position
+        xvalue = (bbox_list[0] + bbox_list[2])/2 #finds the midpoint of the xvalue
+        yvalue = (bbox_list[1] + bbox_list[3])/2
+            
+        position = convertFace(xvalue,yvalue) #convert coordinates to a position in frame
+        return position
 
 def checkFace(position,image):
     #tells the user the location of their face and asks if that position is ok
     voice_out("Your face is" + position + ". Would you like to change the position?")
     if voice_in():
         voice_out("What would you like the position to be")
-        rePosFace(voice_in(), position)
+        reposition(voice_in())
     else:
         voice_out("Done")
         voice_in()
@@ -229,7 +213,7 @@ def checkObj(obj, position, image):
     if voice_in():
         #user wants to change the position of the current object
         voice_out("What would you like the position to be")
-        rePosObj(voice_in(),position,obj)
+        reposition(voice_in())
     else:
         voice_out("Done")
         cv.imwrite("Final.jpg", image) #saves the image under the name Final in a jpeg format
@@ -242,84 +226,84 @@ def rePosObj(gPos, curPos,obj):
         if(gPos == 'tr'):
             match curPos:
                 case "br":
-                    voice_out(" Move " + obj + " Up ")
+                    print(" Move " + obj + " Up ")
                     time.sleep(3) #makes program waith 3 seconds
                 case "tl":
-                    voice_out("Move" + obj + "right")
+                    print("Move" + obj + "right")
                     time.sleep(3)
                 case "bl":
-                    voice_out("Move" + obj + "up and right")
+                    print("Move" + obj + "up and right")
                     time.sleep(3)
                 case "center":
-                    voice_out("Move" + obj + "right")
+                    print("Move" + obj + "right")
                     time.sleep(3)
                 case "np":
-                    voice_out("Move" + obj +  "down and left")
+                    print("Move" + obj +  "down and left")
                     time.sleep(3)
         elif(gPos == 'tl'):
             match curPos:
                 case 'bl':
-                    voice_out("Move" + obj + "up")
+                    print("Move" + obj + "up")
                     time.sleep(3)
                 case 'tr':
-                    voice_out("Move" + obj + "left")
+                    print("Move" + obj + "left")
                     time.sleep(3)
                 case 'br':
-                    voice_out("Move" + obj + "up and left")
+                    print("Move" + obj + "up and left")
                     time.sleep(3)
                 case "center":
-                    voice_out("Move" + obj + "left")
+                    print("Move" + obj + "left")
                     time.sleep(3)
                 case "np":
-                    voice_out("Move" + obj + "down and right")
+                    print("Move" + obj + "down and right")
                     time.sleep(3)
         elif(gPos == 'br'):
             match curPos:
                 case 'tr':
-                    voice_out("Move" + obj +"down")
+                    print("Move" + obj +"down")
                     time.sleep(3)
                 case 'bl':
-                    voice_out("Move" + obj + "right")
+                    print("Move" + obj + "right")
                     time.sleep(3)
                 case 'tl':
-                    voice_out("Move" + obj + "down and right")
+                    print("Move" + obj + "down and right")
                     time.sleep(3)
                 case 'center':
-                    voice_out("Move" + obj +"right")
+                    print("Move" + obj +"right")
                     time.sleep(3)
                 case 'np':
-                    voice_out("Move" + obj + "up and left")
+                    print("Move" + obj + "up and left")
                     time.sleep(3)
         elif (gPos == "bl"):
             match curPos:
                 case 'tl':
-                    voice_out("Move" + obj + "down")
+                    print("Move" + obj + "down")
                     time.sleep(3)
                 case 'br':
-                    voice_out("Move" + obj +"left")
+                    print("Move" + obj +"left")
                     time.sleep(3)
                 case 'tr':
-                    voice_out("Move" + obj + "down and left")
+                    print("Move" + obj + "down and left")
                     time.sleep(3)
                 case 'center':
-                    voice_out("Move" + obj + "left")
+                    print("Move" + obj + "left")
                     time.sleep(3)
                 case 'np':
-                    voice_out("Move" + obj + "up and right")
+                    print("Move" + obj + "up and right")
                     time.sleep(3)
         elif gPos == 'center':
             match curPos:
                 case 'bl':
-                    voice_out("Move" + obj + "right")
+                    print("Move" + obj + "right")
                     time.sleep(3)
                 case 'tl':
-                    voice_out("Move" + obj +  "right")
+                    print("Move" + obj +  "right")
                     time.sleep(3)
                 case 'tr':
-                    voice_out("Move" + obj + "left")
+                    print("Move" + obj + "left")
                     time.sleep(3)
                 case 'br':
-                    voice_out("Move" + obj + "left")
+                    print("Move" + obj + "left")
                     time.sleep(3)
         
         #retakes the photo and processes it to find the new postion
@@ -338,91 +322,91 @@ def rePosFace(gPos, curPos):
         if(gPos == 'tr'):
             match curPos:
                 case "br":
-                    voice_out("Move face Up")
+                    print("Move face Up")
                     time.sleep(3) #makes program waith 3 seconds
                 case "tl":
-                    voice_out("Move face right")
+                    print("Move face right")
                     time.sleep(3)
                 case "bl":
-                    voice_out("Move face up and right")
+                    print("Move face up and right")
                     time.sleep(3)
                 case "center":
-                    voice_out("Move face right")
+                    print("Move face right")
                     time.sleep(3)
                 case "np":
-                    voice_out("Move face down and left")
+                    print("Move face down and left")
                     time.sleep(3)
         elif(gPos == 'tl'):
             match curPos:
                 case 'bl':
-                    voice_out("Move face up")
+                    print("Move face up")
                     time.sleep(3)
                 case 'tr':
-                    voice_out("Move face left")
+                    print("Move face left")
                     time.sleep(3)
                 case 'br':
-                    voice_out("Move face up and left")
+                    print("Move face up and left")
                     time.sleep(3)
                 case "center":
-                    voice_out("Move face left")
+                    print("Move face left")
                     time.sleep(3)
                 case "np":
-                    voice_out("Move face down and right")
+                    print("Move face down and right")
                     time.sleep(3)
         elif(gPos == 'br'):
             match curPos:
                 case 'tr':
-                    voice_out("Move face down")
+                    print("Move face down")
                     time.sleep(3)
                 case 'bl':
-                    voice_out("Move face right")
+                    print("Move face right")
                     time.sleep(3)
                 case 'tl':
-                    voice_out("Move face down and right")
+                    print("Move face down and right")
                     time.sleep(3)
                 case 'center':
-                    voice_out("Move face right")
+                    print("Move face right")
                     time.sleep(3)
                 case 'np':
-                    voice_out("Move face up and left")
+                    print("Move face up and left")
                     time.sleep(3)
         elif (gPos == "bl"):
             match curPos:
                 case 'tl':
-                    voice_out("Move face down")
+                    print("Move face down")
                     time.sleep(3)
                 case 'br':
-                    voice_out("Move face left")
+                    print("Move face left")
                     time.sleep(3)
                 case 'tr':
-                    voice_out("Move face down and left")
+                    print("Move face down and left")
                     time.sleep(3)
                 case 'center':
-                    voice_out("Move face left")
+                    print("Move face left")
                     time.sleep(3)
                 case 'np':
-                    voice_out("Move face up and right")
+                    print("Move face up and right")
                     time.sleep(3)
         elif gPos == 'center':
             match curPos:
                 case 'bl':
-                    voice_out("Move face right")
+                    print("Move face right")
                     time.sleep(3)
                 case 'tl':
-                    voice_out("Move face right")
+                    print("Move face right")
                     time.sleep(3)
                 case 'tr':
-                    voice_out("Move face left")
+                    print("Move face left")
                     time.sleep(3)
                 case 'br':
-                    voice_out("Move face left")
+                    print("Move face left")
                     time.sleep(3)
         
         #take a new photo and process it to find the new current position of the face
         image = take_photo()
         coords = processFace(image) 
         curPos = convertFace(coords[0],coords[1])
-        print("Your current position is: ", curPos) #debugging 
+        print("Your current position is: ", curPos)
 
     #save the image when it is in the correct section as specified by the user
     cv.imshow("Fianl",image)
@@ -449,9 +433,8 @@ def convertPos(x,y):
 
 def convertFace(x,y):
     #takes the coord of the midpoint and make it an accepted postion
-    if(x == None and y == None):
-        pos = "np" #face not found in the frame
-    elif(((x < .24) and (y > .320))):
+    
+    if(((x < .24) and (y > .320))):
         pos = "bl" #center of object is in bottom left, as x and y positons are less than edges
     elif(((x < .240 ) and (y < .320))):
         pos = "tl" #center of object is in top left as x value is less than horizontal bound and y is greater than vertical bound

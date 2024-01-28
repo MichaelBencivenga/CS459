@@ -4,4 +4,4 @@
 # pip install ultralytics
 # pip install mediapipe
 # pip install pyttsx3
-# pip install pyaudio
+#sudo apt install python3-pyaudio
