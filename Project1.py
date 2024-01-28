@@ -12,6 +12,9 @@ from ultralytics import YOLO
 from PIL import Image
 import time
 import numpy as np
+from matplotlib import cm
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
 ultralytics.checks()
 model = YOLO("yolov8n.pt") #loads the pretrained yolov8 model to save time when application is in use
 
@@ -32,7 +35,7 @@ def main():
         global engine 
         engine = pyttsx3.init()
         engine.setProperty('volume', 0.6)
-        voice_out("Hello welcome to the program. Would you like to take a selfie, or photograph an object?")
+        #voice_out("Hello welcome to the program. Would you like to take a selfie, or photograph an object?")
         voice_in()
     #except Exception as e:
         #Print details of the exception
@@ -107,6 +110,7 @@ def voice_out(vo_out):
     engine.runAndWait()
 
 def take_photo(cameramode):
+    webcam = cv.VideoCapture(0)
     image = PIL.Image.open("Batman.png")
     if cameramode == 0:
         #Selfie option
@@ -118,7 +122,7 @@ def take_photo(cameramode):
             #Take a little silly photo
             succ, image = webcam.read()
             image = cv.flip(image,1) #flips the image horizontally
-            image.show()
+            cv.imshow(image)
             return image
     else:
         #Object option
@@ -137,7 +141,7 @@ def processFace(image):
     image2 = cv.cvtColor(np.array(image),cv.COLOR_BGR2RGB) #changes color scale to allow mediapipe image processing
     results = mp_face_detection.process(image2) #uses face detection model to find faces in image
     image2 = cv.cvtColor(image2,cv.COLOR_RGB2BGR) #return image to original color scale
-
+    
     #draw face detection annotations 
     if results.detections:
         for detection in results.detections:
@@ -149,7 +153,6 @@ def processFace(image):
 
         xvalue = (bbox_list[0] + bbox_list[2])/2 #finds the midpoint of the xvalue
         yvalue = (bbox_list[1] + bbox_list[3])/2
-            
         position = convertFace(xvalue,yvalue) #convert coordinates to a position in frame
         return position
 
