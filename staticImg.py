@@ -158,7 +158,9 @@ def reposition (gPos,curPos):
                     voice_out("Move object left")
                     time.sleep(3)
         
+        print("Get ready to retake the image")
         image = take_image()
+        print("Image captured")
         objs,coords = processObjs(image) 
         coords2 = coords[0] 
 
@@ -172,7 +174,7 @@ def reposition (gPos,curPos):
         yvalues = yvalues.numpy()
 
         curPos = convertPos(xvalues,yvalues)
-        print("Your current position is: ", curPos, "goal: ", gPos)
+        print("The" +obj + "current position is: " + curPos + "goal: ", gPos)
 
 
     cv.imshow("FinalObj",image)
@@ -212,6 +214,7 @@ while count < numObjs:
         
     count += 1
 
+    print("The " + obj + " is currently in " + position)
     goalPos = input("Where would you like the object to be positioned")
     print(goalPos)
     if position == goalPos:
