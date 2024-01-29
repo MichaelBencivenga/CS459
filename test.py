@@ -34,7 +34,7 @@ def commands(vo_in):
                 print("Nuh uh")
     else:
         match vo_in:
-            case "center":
+            case "the center":
                 return "center"
             case "bottom left":
                 return "bl"
