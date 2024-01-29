@@ -16,7 +16,7 @@ def voice_in(object =0):
         r = sr.Recognizer()
         with sr.Microphone(sample_rate=16000) as source:
             audio = r.listen(source, timeout=10, phrase_time_limit=3)
-            vo_in = r.recognize_google(audio)
+            vo_in = r.recognize_google(audio, language = 'en-IN', show_all = True)
         if object:
             return vo_in
         return commands(vo_in)
