@@ -221,6 +221,7 @@ def reposition (gPos,curPos):
 
 
     cv.imshow("FinalObj",image)
+    cv.waitKey(0)
     cv.imwrite("FinalObj.jpg",image)
 
 
@@ -264,6 +265,7 @@ while count < numObjs:
     print(goalPos)
     if position == goalPos:
         cv.imshow("FinalObj",image)
+        cv.waitKey(0)
         cv.imwrite("FinalObj.jpg",image)
     else:
         reposition(goalPos,position)
