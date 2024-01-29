@@ -194,6 +194,7 @@ def reposition (gPos,curPos):
 
 
     cv.imshow("FinalFace",image)
+    cv.waitKey(0) #shows image until a key is hit
     cv.imwrite("FinalFace.jpg",image)
 
 
@@ -213,6 +214,7 @@ goalPos = voice_in()
 print(goalPos)
 if position == goalPos:
     cv.imshow("FinalFace",image)
+    cv.waitKey(0) #shows image until any key is pressed
     cv.imwrite("FinalFace.jpg",image)
 else:
     reposition(goalPos,position)
