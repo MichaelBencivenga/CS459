@@ -217,13 +217,27 @@ def reposition (gPos,curPos):
         yvalues = yvalues.numpy()
 
         curPos = convertPos(xvalues,yvalues)
-        print("The" +obj + "current position is: " + curPos + "goal: ", gPos)
+        #print("The" +obj + "current position is: " + curPos + "goal: ", gPos)
 
 
     cv.imshow("FinalObj",image)
     cv.waitKey(0)
     cv.imwrite("FinalObj.jpg",image)
 
+def convertWord(pos):
+    match pos:
+        case "bl":
+            return "bottom left"
+        case "br":
+            return "bottom right"
+        case "tl":
+            return "top left"
+        case "tr":
+            return "top right"
+        case "center":
+            return "center"
+        case "np":
+            return "Not in a position"
 
 voice_out("Welcome to the program get ready for your static image")
 image = take_image()
@@ -258,8 +272,10 @@ while count < numObjs:
         
     count += 1
 
-    print("The " + obj + " is currently in " + position)
-    voice_out("The " + obj + " is currently in " + position)
+    humanPos = convertWord(position)
+
+    #print("The " + obj + " is currently in " + position)
+    voice_out("The " + obj + " is currently in " + humanPos)
     voice_out("Where would you like the object to be positioned")
     goalPos = voice_in()
     print(goalPos)
