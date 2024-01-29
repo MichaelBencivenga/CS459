@@ -34,7 +34,7 @@ def commands(vo_in):
                 print("Nuh uh")
     else:
         match vo_in:
-            case "center":
+            case "the center":
                 return "center"
             case "bottom left":
                 return "bl"
@@ -190,13 +190,27 @@ def reposition (gPos,curPos):
         voice_out("New image taken")
         coords = processImg(image) 
         curPos = convertFace(coords[0],coords[1])
-        print("Your current position is: ", curPos, "goal: ", gPos)
+        #print("Your current position is: ", curPos, "goal: ", gPos)
 
 
     cv.imshow("FinalFace",image)
     cv.waitKey(0) #shows image until a key is hit
     cv.imwrite("FinalFace.jpg",image)
 
+def convertWord(pos):
+    match pos:
+        case "bl":
+            return "bottom left"
+        case "br":
+            return "bottom right"
+        case "tl":
+            return "top left"
+        case "tr":
+            return "top right"
+        case "center":
+            return "center"
+        case "np":
+            return "Not in a position"
 
 mp_face_detection = mp.solutions.face_detection.FaceDetection()
 mp_drawing=mp.solutions.drawing_utils
@@ -207,8 +221,9 @@ image = take_image()
 voice_out("Selfie taken")
 coords = processImg(image)
 position = convertFace(coords[0],coords[1])
+humanPosition = convertWord(position)
 
-voice_out("Your face is currently in position, " + position +
+voice_out("Your face is currently in position, " + humanPosition +
           ". What position would you like your face to be in?")
 goalPos = voice_in()
 print(goalPos)
