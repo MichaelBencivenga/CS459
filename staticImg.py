@@ -68,7 +68,7 @@ def take_image():
         cv.imwrite("testpic.jpg",image)
         return image
     else:
-        print("No image detected")
+        voice_out("No image detected")
 
 
 def convertPos(x,y):
@@ -201,9 +201,9 @@ def reposition (gPos,curPos):
                     voice_out("Move object left")
                     time.sleep(3)
         
-        print("Get ready to retake the image")
+        voice_out("Get ready to retake the image")
         image = take_image()
-        print("Image captured")
+        voice_out("Image captured")
         objs,coords = processObjs(image) 
         coords2 = coords[0] 
 
@@ -217,7 +217,7 @@ def reposition (gPos,curPos):
         yvalues = yvalues.numpy()
 
         curPos = convertPos(xvalues,yvalues)
-        print("The" +obj + "current position is: " + curPos + "goal: ", gPos)
+        voice_out("The" +obj + "current position is: " + curPos + "goal: " + gPos)
 
 
     cv.imshow("FinalObj",image)
