@@ -1,5 +1,6 @@
 import pyttsx3
 import time
+import speech_recognition as sr
 import cv2 as cv
 import ultralytics
 from ultralytics import YOLO
@@ -10,22 +11,61 @@ global engine
 engine = pyttsx3.init()
 engine.setProperty('volume', 0.6)
 
+def voice_in(object =0):
+     try:
+        r = sr.Recognizer()
+        with sr.Microphone(sample_rate=16000) as source:
+            audio = r.listen(source, timeout=10, phrase_time_limit=3)
+            vo_in = r.recognize_google(audio, language='en-US')
+        if object:
+            return vo_in
+        return commands(vo_in)
+     except sr.WaitTimeoutError:
+        print("bruh")
+        return 1
+     
+def commands(vo_in):
+    if "help" in vo_in:
+        #Find last word, hopefully the command
+        words = list(vo_in.split(" "))
+        length = len(words)
+        vo_in = words[len-1]
+        match vo_in:
+            case _: 
+                print("Nuh uh")
+    else:
+        match vo_in:
+            case "center":
+                return "center"
+            case "bottom left":
+                return "bl"
+            case "bottom right":
+                return "br"
+            case "top left":
+                return "tl"
+            case "top right":
+                return "tr"
+            case _:
+                print("Nuh uh")
+                voice_out("Command not recognized")
+                voice_in()
+     
 def voice_out(vo_out):
     engine.say(vo_out)
     engine.runAndWait()
 
 def take_image():
     #setting up camera and taking pic
-    cam_port =0;
-    cam = cv.VideoCapture(cam_port);
-    result,image = cam.read();
+    cam_port =0
+    cam = cv.VideoCapture(cam_port)
+    result,image = cam.read()
     image = cv.flip(image,1) #flips image horizonally
 
     if result: 
-        cv.imwrite("testpic.jpg",image);
+        cv.imwrite("testpic.jpg",image)
         return image
     else:
-        print("No image detected");
+        print("No image detected")
 
 
 def convertPos(x,y):
@@ -215,7 +255,9 @@ while count < numObjs:
     count += 1
 
     print("The " + obj + " is currently in " + position)
-    goalPos = input("Where would you like the object to be positioned")
+    voice_out("The " + obj + " is currently in " + position)
+    voice_out("Where would you like the object to be positioned")
+    goalPos = voice_in()
     print(goalPos)
     if position == goalPos:
         cv.imshow("FinalObj",image)
