@@ -185,7 +185,9 @@ def reposition (gPos,curPos):
                     voice_out("Move face left")
                     time.sleep(3)
         
+        voice_out("Get ready for new selfie")
         image = take_image()
+        voice_out("New image taken")
         coords = processImg(image) 
         curPos = convertFace(coords[0],coords[1])
         print("Your current position is: ", curPos, "goal: ", gPos)
@@ -201,6 +203,7 @@ mp_drawing=mp.solutions.drawing_utils
 voice_out("Welcome to the program get ready for your selfie")
 
 image = take_image()
+voice_out("Selfie taken")
 coords = processImg(image)
 position = convertFace(coords[0],coords[1])
 
