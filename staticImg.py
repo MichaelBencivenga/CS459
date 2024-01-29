@@ -1,3 +1,4 @@
+import numpy
 import pyttsx3
 import time
 import speech_recognition as sr
@@ -23,6 +24,8 @@ def voice_in(object =0):
      except sr.WaitTimeoutError:
         print("bruh")
         return 1
+     except Exception as e:
+         print(e)
      
 def commands(vo_in):
     if "help" in vo_in:
@@ -103,7 +106,7 @@ def processObjs(image):
         im_array = r.plot() #plot a BGR numpy array of predictions
         im = Image.fromarray(im_array[...,::-1]) #RGB PIL image
 
-    cv.imwrite("AnnotatedIm.jpg",im)
+    #cv.imwrite("AnnotatedIm.jpg",numpy(im))
 
     boxes = r.boxes #put bounding box detections into a list
     coords.append(boxes.xywh) #list of the xy coordiantes, first coord is bottom left and second is top right
