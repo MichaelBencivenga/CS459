@@ -63,7 +63,7 @@ def processObjs(image):
         im_array = r.plot() #plot a BGR numpy array of predictions
         im = Image.fromarray(im_array[...,::-1]) #RGB PIL image
 
-    im.write("AnnotatedIm.jpg")
+    cv.imwrite("AnnotatedIm.jpg",im)
 
     boxes = r.boxes #put bounding box detections into a list
     coords.append(boxes.xywh) #list of the xy coordiantes, first coord is bottom left and second is top right
@@ -71,33 +71,7 @@ def processObjs(image):
     for c in r.boxes.cls:
         objs.append(names[int(c)]) #adds name of each object detected to list in same order as coordinates
 
-    #numObjs = len(objs)
-    count = 0
-    coords2 = coords[0] #gets the tenosr that is at the first element of the list
-
-    #while count < numObjs:
-        #go through each object detected and tell the user what it is and where it is located
-    obj = objs[0]
-    curcoord = coords2[count,:] #gives the coords of the current object
-    
-    xvalues = (curcoord[0] + curcoord[2])/2 #adds the start x to the width of the bounding box and divides by 2 to find the midpoint
-    yvalues = (curcoord[1] + abs(curcoord[1] - curcoord[3])) #adds the start y to the height of the bounding box and divides by 2 to find the midpoint
-
-    xvalues = xvalues.numpy() #converts from tensor number to numpy number
-    yvalues = yvalues.numpy()
-
-    position = convertPos(xvalues,yvalues)
-    
-    #debugging print statments
-    print(obj)
-    print(curcoord)
-    print(xvalues)
-    print(yvalues)
-    print(position)
-    print(" ")
-        
-        #count += 1
-    return(xvalues,yvalues)
+    return objs, coords
 
 def reposition (gPos,curPos):
     while(gPos != curPos):
@@ -185,25 +159,63 @@ def reposition (gPos,curPos):
                     time.sleep(3)
         
         image = take_image()
-        coords = processObjs(image) 
-        curPos = convertPos(coords[0],coords[1])
-        #voice_out("Your current position is: ", curPos, "goal: ", gPos)
+        objs,coords = processObjs(image) 
+        coords2 = coords[0] 
+
+        obj = objs[0]
+        curcoord = coords2[0,:] #gives the coords of the current object
+    
+        xvalues = (curcoord[0] + curcoord[2])/2 #adds the start x to the width of the bounding box and divides by 2 to find the midpoint
+        yvalues = (curcoord[1] + abs(curcoord[1] - curcoord[3])) #adds the start y to the height of the bounding box and divides by 2 to find the midpoint
+
+        xvalues = xvalues.numpy() #converts from tensor number to numpy number
+        yvalues = yvalues.numpy()
+
+        curPos = convertPos(xvalues,yvalues)
+        print("Your current position is: ", curPos, "goal: ", gPos)
 
 
-    image.show("FianlObj",)
+    cv.imshow("FinalObj",image)
     cv.imwrite("FinalObj.jpg",image)
 
 
 voice_out("Welcome to the program get ready for your static image")
 image = take_image()
 voice_out("Image taken")
-coords = processObjs(image)
-position = convertPos(coords[0],coords[1])
+objs,coords = processObjs(image)
 
-goalPos = input("Where would you like the object to be positioned")
-print(goalPos)
-if position == goalPos:
-    cv.imshow("FinalObj",image)
-    cv.imwrite("FinalObj.jpg",image)
-else:
-    reposition(goalPos,position)
+
+numObjs = len(objs)
+coords2 = coords[0] #gets the tenosr that is at the first element of the list
+count = 0
+
+while count < numObjs:
+    #go through each object detected and tell the user what it is and where it is located
+    obj = objs[count]
+    curcoord = coords2[count,:] #gives the coords of the current object
+    
+    xvalues = (curcoord[0] + curcoord[2])/2 #adds the start x to the width of the bounding box and divides by 2 to find the midpoint
+    yvalues = (curcoord[1] + abs(curcoord[1] - curcoord[3])) #adds the start y to the height of the bounding box and divides by 2 to find the midpoint
+
+    xvalues = xvalues.numpy() #converts from tensor number to numpy number
+    yvalues = yvalues.numpy()
+
+    position = convertPos(xvalues,yvalues)
+    
+    #debugging print statments
+    print(obj)
+    print(curcoord)
+    print(xvalues)
+    print(yvalues)
+    print(position)
+    print(" ")
+        
+    count += 1
+
+    goalPos = input("Where would you like the object to be positioned")
+    print(goalPos)
+    if position == goalPos:
+        cv.imshow("FinalObj",image)
+        cv.imwrite("FinalObj.jpg",image)
+    else:
+        reposition(goalPos,position)
