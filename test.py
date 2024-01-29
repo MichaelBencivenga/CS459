@@ -193,8 +193,8 @@ def reposition (gPos,curPos):
         print("Your current position is: ", curPos, "goal: ", gPos)
 
 
-    cv.imshow("Final",image)
-    cv.imwrite("Final.jpg",image)
+    cv.imshow("FinalFace",image)
+    cv.imwrite("FinalFace.jpg",image)
 
 
 mp_face_detection = mp.solutions.face_detection.FaceDetection()
@@ -212,7 +212,7 @@ voice_out("Your face is currently in position, " + position +
 goalPos = voice_in()
 print(goalPos)
 if position == goalPos:
-    cv.imshow("Final",image)
-    cv.imwrite("Final.jpg",image)
+    cv.imshow("FinalFace",image)
+    cv.imwrite("FinalFace.jpg",image)
 else:
     reposition(goalPos,position)
