@@ -11,7 +11,7 @@ global engine
 engine = pyttsx3.init()
 engine.setProperty('volume', 0.6)
 
-'''def voice_in(object =0):
+def voice_in(object =0):
      try:
         r = sr.Recognizer()
         with sr.Microphone(sample_rate=16000) as source:
@@ -19,8 +19,35 @@ engine.setProperty('volume', 0.6)
             vo_in = r.recognize_google(audio)
         if object:
             return vo_in
+        return commands(vo_in)
      except sr.WaitTimeoutError:
-        return 1 '''
+        print("bruh")
+        return 1
+def commands(vo_in):
+    if "help" in vo_in:
+        #Find last word, hopefully the command
+        words = list(vo_in.split(" "))
+        length = len(words)
+        vo_in = words[len-1]
+        match vo_in:
+            case _: 
+                print("Nuh uh")
+    else:
+        match vo_in:
+            case "center":
+                return "center"
+            case "bottom left":
+                return "bl"
+            case "bottom right":
+                return "br"
+            case "top left":
+                return "tl"
+            case "top right":
+                return "tr"
+            case _:
+                print("Nuh uh")
+                voice_out("Command not recognized")
+                voice_in()
 
 def voice_out(vo_out):
     engine.say(vo_out)
@@ -161,7 +188,7 @@ def reposition (gPos,curPos):
         image = take_image()
         coords = processImg(image) 
         curPos = convertFace(coords[0],coords[1])
-        print("Your current position is: ", curPos)
+        print("Your current position is: ", curPos, "goal: ", gPos)
 
 
     cv.imshow("Fianl",image)
@@ -177,9 +204,10 @@ image = take_image()
 coords = processImg(image)
 position = convertFace(coords[0],coords[1])
 
-voice_out(position)
-goalPos = input("What positon would you like your face to be in? ")
-
+voice_out("Your face is currently in position, " + position +
+          ". What position would you like your face to be in?")
+goalPos = voice_in()
+print(goalPos)
 if position == goalPos:
     cv.imshow("Final",image)
     cv.imwrite("Final.jpg",image)

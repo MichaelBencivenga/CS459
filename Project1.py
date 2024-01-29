@@ -46,8 +46,6 @@ def commands(vo_in):
         match vo_in:
             case _: 
                 print("Nuh uh")
-    elif vo_in.isnumeric():
-        return int(vo_in)/100
     else:
         match vo_in:
             case "commands":
