@@ -33,21 +33,23 @@ def commands(vo_in):
             case _: 
                 print("Nuh uh")
     else:
-        match vo_in:
-            case "the center":
-                return "center"
-            case "bottom left":
-                return "bl"
-            case "bottom right":
-                return "br"
-            case "top left":
-                return "tl"
-            case "top right":
-                return "tr"
-            case _:
-                print("Nuh uh")
-                voice_out("Command not recognized")
-                voice_in()
+        try:
+            match vo_in:
+                case "the center":
+                    return "center"
+                case "bottom left":
+                    return "bl"
+                case "bottom right":
+                    return "br"
+                case "top left":
+                    return "tl"
+                case "top right":
+                    return "tr"
+                case _:
+                    voice_out("Command not recognized, accepted commands are, the center, top right, top left, bottom right, and bottom left, please state your command")
+                    voice_in()
+        except sr.UnknownValueError:
+            voice_in()
 
 def voice_out(vo_out):
     engine.say(vo_out)
