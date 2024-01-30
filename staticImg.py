@@ -1,4 +1,5 @@
 import numpy
+import random
 import pyttsx3
 import time
 import speech_recognition as sr
@@ -117,6 +118,7 @@ def processObjs(image):
     return objs, coords
 
 def reposition (gPos,curPos):
+    #while the current postion does not equal the goal postion have user move face and take + process new images
     while(gPos != curPos):
         if(gPos == 'tr'):
             match curPos:
@@ -200,6 +202,13 @@ def reposition (gPos,curPos):
                 case 'br':
                     voice_out("Move camera right")
                     time.sleep(3)
+                case 'np':
+                    #making its best guess and tells the user where to move face
+                    num = random.choices(population = {1,2}, k=1)
+                    if num == 1:
+                        voice_out("Move face left")
+                    else:
+                        voice_out("Move face right")
         
         voice_out("Get ready to retake the image")
         image = take_image()
@@ -225,6 +234,7 @@ def reposition (gPos,curPos):
     cv.imwrite("FinalObj.jpg",image)
 
 def convertWord(pos):
+    #converts the postion to an easy string for user to understand
     match pos:
         case "bl":
             return "bottom left"
