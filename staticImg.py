@@ -75,15 +75,15 @@ def take_image():
 def convertPos(x,y):
     #take the coord and make it an accepted postion
     
-    if(((x < 240) and (y < 320))):
+    if(((x < 320) and (y < 240))):
         pos = "bl" #center of object is in bottom left, as x and y positons are less than edges
-    elif(((x < 240 ) and (y > 320))):
+    elif(((x < 320 ) and (y > 240))):
         pos = "tl" #center of object is in top left as x value is less than horizontal bound and y is greater than vertical bound
-    elif (((x > 400) and (y < 320))):
+    elif (((x > 320) and (y < 400))):
         pos = "br" #in bottom right
-    elif(((x > 400) and (y > 320))):
+    elif(((x > 320) and (y > 400))):
         pos = "tr" #in top right
-    elif((x > 240) and (x <400)):
+    elif((x > 240) and (x < 400)):
         pos = "center" #temporary default
     else:
         pos = "Not in a position"

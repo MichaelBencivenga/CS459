@@ -16,9 +16,9 @@ def voice_in():
      try:
         r = sr.Recognizer()
         with sr.Microphone() as source:
-            r.adjust_for_ambient_noise(source)
+            #r.adjust_for_ambient_noise(source)
             audio = r.listen(source)
-            vo_in = r.recognize_google(audio)
+            vo_in = r.recognize_google(audio, language='en-US')
         return commands(vo_in) 
      except:
          voice_out("Voice not recognized try again")
