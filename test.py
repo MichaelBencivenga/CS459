@@ -188,8 +188,9 @@ def reposition (gPos,curPos):
         print("Your current position is: ", curPos, "goal: ", gPos)
 
 
-    cv.imshow("Final",image)
-    cv.imwrite("Final.jpg",image)
+    cv.imshow("FinalFace",image)
+    cv.waitKey(0) #shows image until any key on the keyboard is hit
+    cv.imwrite("FinalFace.jpg",image)
 
 def convertWord(pos):
     #converts the postion to an easy string for user to understand
