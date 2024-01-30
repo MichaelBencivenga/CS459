@@ -51,7 +51,7 @@ def commands(vo_in):
             case _:
                 print("Nuh uh")
                 voice_out("Command not recognized")
-                voice_in()
+                return voice_in()
      
 def voice_out(vo_out):
     engine.say(vo_out)
