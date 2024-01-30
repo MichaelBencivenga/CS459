@@ -13,33 +13,20 @@ global engine
 engine = pyttsx3.init()
 engine.setProperty('volume', 0.6)
 
-def voice_in(object =0):
+def voice_in():
      try:
         r = sr.Recognizer()
-        with sr.Microphone(sample_rate=16000) as source:
-            audio = r.listen(source, timeout=10, phrase_time_limit=3)
+        with sr.Microphone() as source:
+            #r.adjust_for_ambient_noise(source)
+            audio = r.listen(source)
             vo_in = r.recognize_google(audio, language='en-US')
-        if object:
-            return vo_in
-        return commands(vo_in)
-     except sr.WaitTimeoutError:
-        print("bruh")
-        return 1
-     except Exception as e:
-         print(e)
-     
+        return commands(vo_in) 
+     except:
+         voice_out("Voice not recognized try again")
+         voice_in()
 def commands(vo_in):
-    if "help" in vo_in:
-        #Find last word, hopefully the command
-        words = list(vo_in.split(" "))
-        length = len(words)
-        vo_in = words[len-1]
         match vo_in:
-            case _: 
-                print("Nuh uh")
-    else:
-        match vo_in:
-            case "center":
+            case "the center":
                 return "center"
             case "bottom left":
                 return "bl"
@@ -75,15 +62,15 @@ def take_image():
 def convertPos(x,y):
     #take the coord and make it an accepted postion
     
-    if(((x < 320) and (y < 240))):
+    if(((x < 213) and (y < 140))):
         pos = "bl" #center of object is in bottom left, as x and y positons are less than edges
-    elif(((x < 320 ) and (y > 240))):
+    elif(((x < 213 ) and (y > 140))):
         pos = "tl" #center of object is in top left as x value is less than horizontal bound and y is greater than vertical bound
-    elif (((x > 320) and (y < 400))):
+    elif (((x > 426) and (y < 300))):
         pos = "br" #in bottom right
-    elif(((x > 320) and (y > 400))):
+    elif(((x > 426) and (y > 300))):
         pos = "tr" #in top right
-    elif((x > 240) and (x < 400)):
+    elif((x > 213) and (x <  426)):
         pos = "center" #temporary default
     else:
         pos = "Not in a position"
@@ -287,6 +274,7 @@ while count < numObjs:
     #print("The " + obj + " is currently in " + position)
     voice_out("The " + obj + " is currently in " + humanPos)
     voice_out("Where would you like the object to be positioned")
+    goalPos = "RAHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
     goalPos = voice_in()
     print(goalPos)
     if position == goalPos:
