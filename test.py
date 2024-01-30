@@ -11,47 +11,34 @@ global engine
 engine = pyttsx3.init()
 engine.setProperty('volume', 0.6)
 
-def voice_in(object =0):
+def voice_in():
      try:
         r = sr.Recognizer()
-        with sr.Microphone(sample_rate=16000) as source:
-            audio = r.listen(source, timeout=10, phrase_time_limit=3)
-            vo_in = r.recognize_google(audio, language='en-US')
-        if object:
-            return vo_in
-        return commands(vo_in)
-     except sr.WaitTimeoutError:
-        print("bruh")
-        return 1
+        with sr.Microphone() as source:
+            r.adjust_for_ambient_noise(source)
+            audio = r.listen(source)
+            vo_in = r.recognize_google(audio)
+        return commands(vo_in) 
+     except:
+         voice_out("Voice not recognized try again")
+         voice_in()
 def commands(vo_in):
-    if "help" in vo_in:
-        #Find last word, hopefully the command
-        words = list(vo_in.split(" "))
-        length = len(words)
-        vo_in = words[len-1]
         match vo_in:
-            case _: 
+            case "center":
+                return "center"
+            case "bottom left":
+                return "bl"
+            case "bottom right":
+                return "br"
+            case "top left":
+                return "tl"
+            case "top right":
+                return "tr"
+            case _:
                 print("Nuh uh")
-    else:
-        try:
-            match vo_in:
-                case "the center":
-                    return "center"
-                case "bottom left":
-                    return "bl"
-                case "bottom right":
-                    return "br"
-                case "top left":
-                    return "tl"
-                case "top right":
-                    return "tr"
-                case _:
-                    voice_out("Command not recognized, accepted commands are, the center, top right, top left, bottom right, and bottom left, please state your command")
-                    voice_in()
-        except sr.UnknownValueError:
-            voice_in()
-
-def voice_out(vo_out):
+                voice_out("Command not recognized")
+                return voice_in()
+def voice_out(vo_out): 
     engine.say(vo_out)
     engine.runAndWait()
 
@@ -187,32 +174,15 @@ def reposition (gPos,curPos):
                     voice_out("Move face left")
                     time.sleep(3)
         
-        voice_out("Get ready for new selfie")
         image = take_image()
-        voice_out("New image taken")
         coords = processImg(image) 
         curPos = convertFace(coords[0],coords[1])
-        #print("Your current position is: ", curPos, "goal: ", gPos)
+        print("Your current position is: ", curPos, "goal: ", gPos)
 
 
-    cv.imshow("FinalFace",image)
-    cv.waitKey(0) #shows image until a key is hit
-    cv.imwrite("FinalFace.jpg",image)
+    cv.imshow("Final",image)
+    cv.imwrite("Final.jpg",image)
 
-def convertWord(pos):
-    match pos:
-        case "bl":
-            return "bottom left"
-        case "br":
-            return "bottom right"
-        case "tl":
-            return "top left"
-        case "tr":
-            return "top right"
-        case "center":
-            return "center"
-        case "np":
-            return "Not in a position"
 
 mp_face_detection = mp.solutions.face_detection.FaceDetection()
 mp_drawing=mp.solutions.drawing_utils
@@ -220,18 +190,17 @@ mp_drawing=mp.solutions.drawing_utils
 voice_out("Welcome to the program get ready for your selfie")
 
 image = take_image()
-voice_out("Selfie taken")
 coords = processImg(image)
 position = convertFace(coords[0],coords[1])
-humanPosition = convertWord(position)
 
-voice_out("Your face is currently in position, " + humanPosition +
+voice_out("Your face is currently in position, " + position +
           ". What position would you like your face to be in?")
+goalPos = "RAHHHHHH"
 goalPos = voice_in()
 print(goalPos)
 if position == goalPos:
-    cv.imshow("FinalFace",image)
-    cv.waitKey(0) #shows image until any key is pressed
-    cv.imwrite("FinalFace.jpg",image)
+    cv.imshow("Final",image)
+    time.wait(5)
+    cv.imwrite("Final.jpg",image)
 else:
     reposition(goalPos,position)
