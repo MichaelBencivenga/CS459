@@ -182,7 +182,9 @@ def reposition (gPos,curPos):
                     else:
                         voice_out("Move face right")
         
+        voice_out("Get ready to retake selfie")
         image = take_image()
+        voice_out("Selfie retaken")
         coords = processImg(image) 
         curPos = convertFace(coords[0],coords[1])
         print("Your current position is: ", curPos, "goal: ", gPos)
