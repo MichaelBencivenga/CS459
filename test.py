@@ -190,6 +190,20 @@ def reposition (gPos,curPos):
     cv.imshow("Final",image)
     cv.imwrite("Final.jpg",image)
 
+def convertWord(pos):
+    match pos:
+        case "bl":
+            return "bottom left"
+        case "br":
+            return "bottom right"
+        case "tl":
+            return "top left"
+        case "tr":
+            return "top right"
+        case "center":
+            return "center"
+        case "np":
+            return "Not in a position"
 
 mp_face_detection = mp.solutions.face_detection.FaceDetection()
 mp_drawing=mp.solutions.drawing_utils
@@ -200,7 +214,9 @@ image = take_image()
 coords = processImg(image)
 position = convertFace(coords[0],coords[1])
 
-voice_out("Your face is currently in position, " + position +
+humanPos = convertWord(position)
+
+voice_out("Your face is currently in position, " + humanPos +
           ". What position would you like your face to be in?")
 goalPos = "RAHHHHHH"
 goalPos = voice_in()
