@@ -121,84 +121,84 @@ def reposition (gPos,curPos):
         if(gPos == 'tr'):
             match curPos:
                 case "br":
-                    voice_out("Move object up")
+                    voice_out("Move camera down")
                     time.sleep(3) #makes program waith 3 seconds
                 case "tl":
-                    voice_out("Move object right")
+                    voice_out("Move camera left")
                     time.sleep(3)
                 case "bl":
-                    voice_out("Move object up and right")
+                    voice_out("Move camera down and left")
                     time.sleep(3)
                 case "center":
-                    voice_out("Move object right")
+                    voice_out("Move camera left")
                     time.sleep(3)
                 case "np":
-                    voice_out("Move object down and left")
+                    voice_out("Move camera up and right")
                     time.sleep(3)
         elif(gPos == 'tl'):
             match curPos:
                 case 'bl':
-                    voice_out("Move object up")
+                    voice_out("Move camera down")
                     time.sleep(3)
                 case 'tr':
-                    voice_out("Move object left")
+                    voice_out("Move camera right")
                     time.sleep(3)
                 case 'br':
-                    voice_out("Move object up and left")
+                    voice_out("Move camera down and right")
                     time.sleep(3)
                 case "center":
-                    voice_out("Move object left")
+                    voice_out("Move camera right")
                     time.sleep(3)
                 case "np":
-                    voice_out("Move object down and right")
+                    voice_out("Move camera up and left")
                     time.sleep(3)
         elif(gPos == 'br'):
             match curPos:
                 case 'tr':
-                    voice_out("Move object down")
+                    voice_out("Move camera up")
                     time.sleep(3)
                 case 'bl':
-                    voice_out("Move object right")
+                    voice_out("Move camera left")
                     time.sleep(3)
                 case 'tl':
-                    voice_out("Move object down and right")
+                    voice_out("Move camera up and left")
                     time.sleep(3)
                 case 'center':
-                    voice_out("Move object right")
+                    voice_out("Move camera left")
                     time.sleep(3)
                 case 'np':
-                    voice_out("Move object up and left")
+                    voice_out("Move camera down and right")
                     time.sleep(3)
         elif (gPos == "bl"):
             match curPos:
                 case 'tl':
-                    voice_out("Move object down")
+                    voice_out("Move camera up")
                     time.sleep(3)
                 case 'br':
-                    voice_out("Move object left")
+                    voice_out("Move camera right")
                     time.sleep(3)
                 case 'tr':
-                    voice_out("Move object down and left")
+                    voice_out("Move camera up and right")
                     time.sleep(3)
                 case 'center':
-                    voice_out("Move object left")
+                    voice_out("Move camera left")
                     time.sleep(3)
                 case 'np':
-                    voice_out("Move object up and right")
+                    voice_out("Move camera down and left")
                     time.sleep(3)
         elif gPos == 'center':
             match curPos:
                 case 'bl':
-                    voice_out("Move object right")
+                    voice_out("Move camera left")
                     time.sleep(3)
                 case 'tl':
-                    voice_out("Move object right")
+                    voice_out("Move camera left")
                     time.sleep(3)
                 case 'tr':
-                    voice_out("Move object left")
+                    voice_out("Move camera right")
                     time.sleep(3)
                 case 'br':
-                    voice_out("Move object left")
+                    voice_out("Move camera right")
                     time.sleep(3)
         
         voice_out("Get ready to retake the image")
