@@ -6,6 +6,7 @@ import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 import time
+import random
 
 global engine
 engine = pyttsx3.init()
@@ -173,6 +174,12 @@ def reposition (gPos,curPos):
                 case 'br':
                     voice_out("Move face left")
                     time.sleep(3)
+                case 'np':
+                    num = random.choices(population = {1,2}, k=1)
+                    if num == 1:
+                        voice_out("Move face left")
+                    else:
+                        voice_out("Move face right")
         
         image = take_image()
         coords = processImg(image) 
