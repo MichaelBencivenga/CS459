@@ -24,7 +24,7 @@ def voice_in():
          voice_in()
 def commands(vo_in):
         match vo_in:
-            case "center":
+            case "the center":
                 return "center"
             case "bottom left":
                 return "bl"
